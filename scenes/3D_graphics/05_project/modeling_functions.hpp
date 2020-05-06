@@ -1,5 +1,6 @@
+#pragma once
 #include "main/scene_base/base.hpp"
 
-mesh create_terrain();
-vec4 evaluate_terrain(float u, float v);
 
+vcl::mesh create_terrain();
+vcl::vec3 evaluate_terrain(float u, float v);

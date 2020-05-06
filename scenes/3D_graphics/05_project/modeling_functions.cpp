@@ -1,9 +1,10 @@
 #include "modeling_functions.hpp"
+using namespace vcl;
 
 // Evaluate height of the terrain for any (u,v) \in [0,1]
 float evaluate_terrain_z(float u, float v)
 {
-    const vec4 p = {(0,0),(0.5f,0.5f),(0.2f,0.7f),(0.8f,0.7f)};
+/*    const vec4 p = {(0,0),(0.5f,0.5f),(0.2f,0.7f),(0.8f,0.7f)};
     const vec4 h = {3.0f,-1.5f,1.0f,2.0f};
     const vec4 sigma = {0.5f,0.15f,0.2f,0.2f};
 
@@ -14,18 +15,30 @@ float evaluate_terrain_z(float u, float v)
         d = norm(vec2(u,v)-p[i])/sigma[i];
         z += h[i]*std::exp(-d*d);
     }
+*/
+
+    float z = 0;
+    float detect_river = v - 1.8*u;
+    float profondeur = 4.0;
+
+    if (-1.0 < detect_river){
+        if (-0.9 > detect_river){
+            float distance = std::min(std::abs(-1.0 - detect_river), std::abs(detect_river - 0.9));
+            z -= profondeur*(1-std::exp(-distance));
+        }
+    }
 
     return z;
 }
 
 // Evaluate 3D position of the terrain for any (u,v) \in [0,1]
-vec4 evaluate_terrain(float u, float v)
+vec3 evaluate_terrain(float u, float v)
 {
     const float x = 20*(u-0.5f);
     const float y = 20*(v-0.5f);
     const float z = evaluate_terrain_z(u,v);
 
-    return {x,y,z, 0.0};
+    return {x,y,z};
 }
 
 // Generate terrain mesh
@@ -37,7 +50,6 @@ mesh create_terrain()
     mesh terrain; // temporary terrain storage (CPU only)
     terrain.position.resize(N*N);
     terrain.texture_uv.resize(N*N);
-    terrain.color.resize(N*N);
 
 
     // Fill terrain geometry
@@ -51,8 +63,8 @@ mesh create_terrain()
 
 
             // Compute coordinates and texture and color
-            vec4 coordinates_and_color = evaluate_terrain(u,v);
-            terrain.position[kv+N*ku] = {coordinates_and_color[0], coordinates_and_color[1], coordinates_and_color[2]};
+            vec3 coordinates = evaluate_terrain(u,v);
+            terrain.position[kv+N*ku] = {coordinates[0], coordinates[1], coordinates[2]};
             terrain.texture_uv[kv+N*ku] = {5*u,5*v};
         }
     }
