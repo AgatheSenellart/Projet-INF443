@@ -2,6 +2,15 @@
 #include "main/scene_base/base.hpp"
 #ifdef PROJECT
 
+struct gui_scene_structure
+{
+    bool wireframe = false;
+
+    float height = 0.6f;
+    float scaling = 3.0f;
+    int octave = 7;
+    float persistency = 0.4f;
+};
 
 struct scene_model : scene_base
 {
@@ -29,6 +38,9 @@ struct scene_model : scene_base
     vcl::mesh_drawable house;
     vcl::mesh_drawable bridge;
 
+    void set_gui();
+
+    gui_scene_structure gui_scene;
 
 };
 
