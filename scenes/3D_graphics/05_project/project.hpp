@@ -6,10 +6,10 @@ struct gui_scene_structure
 {
     bool wireframe = false;
 
-    float height = 0.6f;
-    float scaling = 3.0f;
-    int octave = 7;
-    float persistency = 0.4f;
+    float height = 1.0f;
+    float scaling = 6.0f;
+    int octave = 2;
+    float persistency = 0.5f;
 };
 
 struct scene_model : scene_base
