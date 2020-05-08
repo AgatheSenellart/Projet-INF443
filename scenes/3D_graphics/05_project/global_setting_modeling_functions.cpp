@@ -120,23 +120,28 @@ mesh create_cliff(){
 
     mesh cliff;
     cliff.position.resize(total*(H+1));
+    cliff.texture_uv.resize(total*(H+1));
 
     // Fill tree geometry
     for(size_t kz = 0; kz < H+1; ++kz){
         for (unsigned int i = 0; i < total; i++){
             if (i < size_A){ //side_A
                 cliff.position[kz*total + i] = {- (i/size_Af)*0.3, 0, 0.3*kz/Hf};
+                cliff.texture_uv[kz*total + i] = {5*kz,5*i};
             }
             if ((i >= size_A) && (i < size_A + size_B)){//side B
                 cliff.position[kz*total + i] = {-0.3, - (i-size_Af)*0.1 / size_Bf, 0.3*kz/Hf};
+                cliff.texture_uv[kz*total + i] = {5*kz,5*i};
             }
             if ((i >= size_A + size_B) && (i < size_A + size_B + size_C)){//side C
                 float x = - 0.3 + 0.3*(i - size_Af - size_Bf) / size_Cf;
                 float y = -4./3.*x - 0.5;
                 cliff.position[kz*total + i] = {x, y, 0.3*kz/Hf};
+                cliff.texture_uv[kz*total + i] = {5*kz,5*i};
             }
             if (i >= size_A + size_B + size_C){//side D
                 cliff.position[kz*total + i] = {0, -0.5 + 0.5*(i - size_Af - size_Bf - size_Cf)/size_Df, 0.3*kz/Hf};
+                cliff.texture_uv[kz*total + i] = {5*kz,5*i};
             }
         }
     }
@@ -157,6 +162,9 @@ mesh create_cliff(){
         cliff.connectivity.push_back({total*kz, total*kz + total - 1, (kz+1)*total + total - 1});
         cliff.connectivity.push_back({total*kz,total*(kz+1) , (kz+1)*total + total - 1});
     }
+
+    cliff.connectivity.push_back({total*H, total*H + size_A, total*H + size_A + size_B});
+    cliff.connectivity.push_back({total*H + size_A + size_B,total*H + size_A + size_B + size_C, total*H});
 
     return cliff;
 }
