@@ -57,6 +57,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     draw(surface, scene.camera, shaders["mesh"]);
 
     // Display cliff
+    cliff.uniform.transform.scaling = 30;
+    cliff.uniform.transform.translation = vec3(10, 10, -1);
     draw(cliff, scene.camera, shaders["mesh"]);
 
 

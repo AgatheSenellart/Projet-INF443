@@ -119,24 +119,24 @@ mesh create_cliff(){
     const size_t total = size_A + size_B + size_C + size_D;
 
     mesh cliff;
-    cliff.position.resize(total*H);
+    cliff.position.resize(total*(H+1));
 
     // Fill tree geometry
-    for(size_t kz = 0; kz < H; ++kz){
+    for(size_t kz = 0; kz < H+1; ++kz){
         for (unsigned int i = 0; i < total; i++){
             if (i < size_A){ //side_A
-                cliff.position[kz*total + i] = {- i / size_Af*0.3, 0, kz/Hf};
+                cliff.position[kz*total + i] = {- (i/size_Af)*0.3, 0, 0.3*kz/Hf};
             }
             if ((i >= size_A) && (i < size_A + size_B)){//side B
-                cliff.position[kz*total + i] = {-0.3, - (i-size_Af)*0.1 / size_Bf, kz/Hf};
+                cliff.position[kz*total + i] = {-0.3, - (i-size_Af)*0.1 / size_Bf, 0.3*kz/Hf};
             }
             if ((i >= size_A + size_B) && (i < size_A + size_B + size_C)){//side C
-                float x = - 0.3 - 0.3*(i - size_Af - size_Bf) / size_Cf;
+                float x = - 0.3 + 0.3*(i - size_Af - size_Bf) / size_Cf;
                 float y = -4./3.*x - 0.5;
-                cliff.position[kz*total + i] = {x, y, kz/Hf};
+                cliff.position[kz*total + i] = {x, y, 0.3*kz/Hf};
             }
             if (i >= size_A + size_B + size_C){//side D
-                cliff.position[kz*total + i] = {0, -0.5 + 0.5*(i - size_Af - size_Bf - size_Cf)/size_Df, kz/Hf};
+                cliff.position[kz*total + i] = {0, -0.5 + 0.5*(i - size_Af - size_Bf - size_Cf)/size_Df, 0.3*kz/Hf};
             }
         }
     }
@@ -144,7 +144,7 @@ mesh create_cliff(){
 
     // Generate triangle organization
     //  Parametric surface with uniform grid sampling: generate 2 triangles for each grid cell
-    for(unsigned int kz = 0 ; kz < H-1 ; kz++){
+    for(unsigned int kz = 0 ; kz < H ; kz++){
         for(unsigned int i=0; i<total-1; i++){
             const unsigned int idx = total*kz + i; // current vertex offset
 
@@ -154,6 +154,8 @@ mesh create_cliff(){
             cliff.connectivity.push_back(triangle_1);
             cliff.connectivity.push_back(triangle_2);
         }
+        cliff.connectivity.push_back({total*kz, total*kz + total - 1, (kz+1)*total + total - 1});
+        cliff.connectivity.push_back({total*kz,total*(kz+1) , (kz+1)*total + total - 1});
     }
 
     return cliff;
