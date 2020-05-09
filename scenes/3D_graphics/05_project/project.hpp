@@ -32,11 +32,9 @@ struct scene_model : scene_base
     //  List of class attributes to be initialized in setup_data and used in frame_draw
     vcl::mesh_drawable surface;
     vcl::mesh_drawable cliff;
-    vcl::mesh_drawable tree_1;
-    vcl::mesh_drawable tree_2;
-    vcl::mesh_drawable mushroom;
-    vcl::mesh_drawable house;
-    vcl::mesh_drawable bridge;
+    vcl::mesh_drawable moss;
+
+    std::vector<vcl::vec3> moss_positions;
 
     void set_gui();
 

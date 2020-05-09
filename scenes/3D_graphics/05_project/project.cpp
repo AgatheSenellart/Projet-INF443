@@ -3,15 +3,15 @@
 #include "plants_modeling_functions.hpp"
 #ifdef PROJECT
 
-
 /** This function is called before the beginning of the animation loop
     It is used to initialize all part-specific data */
 void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& ){
 
     // Create visual terrain surface
     surface = create_terrain(gui_scene);
-    surface.uniform.color = {0.6f,0.85f,0.5f};
     surface.uniform.shading.specular = 0.0f; // non-specular terrain material
+    surface.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/forest_floor_2.png"));
+
 
     // Setup initial camera mode and position
     scene.camera.camera_type = vcl::camera_control_spherical_coordinates;
@@ -23,23 +23,11 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     cliff.uniform.color = {0.8f,0.0f,0.0f};
     cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff.png"));
 
-    /*
-          // Create tree
-    tree_cylinder = create_cylinder(0.15, 0.8);
-    tree_cylinder.uniform.color = {0.5f,0.7f,0.5f};
-    tree_cone = create_tree_foliage(0.5, 0.6, 0.4);
-    tree_cone.uniform.color = {0.0f,0.85f,0.0f};
+    //Create moss
+    moss = create_moss();
+    moss.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/moss.png"));
+    update_position(500,moss_positions,0, gui_scene);
 
-    update_position(60,tree_positions,0.5, gui_scene);
-
-     // Create mushroom
-     mushroom_cylinder = create_cylinder(0.05, 0.2);
-     mushroom_cylinder.uniform.color = {0.0f,0.0f,0.0f};
-     mushroom_cone = create_cone(0.2, 0.2, 0.2);
-     mushroom_cone.uniform.color = {0.80f,0.0f,0.0f};
-
-     update_position(80,mushroom_positions,0.3, gui_scene);
-     */
 }
 
 
@@ -55,29 +43,35 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // Display terrain
     glPolygonOffset( 1.0, 1.0 );
+    glBindTexture(GL_TEXTURE_2D, surface.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     draw(surface, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Display cliff
+    glBindTexture(GL_TEXTURE_2D, cliff.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     cliff.uniform.transform.scaling = 30;
     cliff.uniform.transform.translation = vec3(10, 10, -1);
     draw(cliff, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
 
- /*   // Display trees
-    for (vec3 position : tree_positions){
-        tree_cone.uniform.transform.translation = position + vec3(0.0f, 0.0f, 0.8f)+ vec3(0.0f, 0.0f, -0.2f);
-        tree_cylinder.uniform.transform.translation = position + vec3(0.0f, 0.0f, -0.2f);
-        draw(tree_cone, scene.camera, shaders["mesh"]);
-        draw(tree_cylinder, scene.camera, shaders["mesh"]);
+    // Display moss
+    glBindTexture(GL_TEXTURE_2D, moss.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    for (vec3 position : moss_positions){
+        moss.uniform.transform.translation = position;
+        draw(moss, scene.camera, shaders["mesh"]);
     }
 
-    // Display mushrooms
-    for (vec3 position : mushroom_positions){
-        mushroom_cone.uniform.transform.translation = position + vec3(0.0f, 0.0f, -0.02f);
-        mushroom_cylinder.uniform.transform.translation = position + vec3(0.0f, 0.0f, -0.02f);
-        draw(mushroom_cone, scene.camera, shaders["mesh"]);
-        draw(mushroom_cylinder, scene.camera, shaders["mesh"]);
-    }*/
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
+
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
         glPolygonOffset( 1.0, 1.0 );
