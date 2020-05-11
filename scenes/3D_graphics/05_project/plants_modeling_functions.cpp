@@ -31,6 +31,16 @@ void update_position(int N, std::vector<vcl::vec3>& positions, float min_distanc
     }
 }
 
+
+
+void update_size(int N, std::vector<float>& sizes){
+    for (int i = 0; i < N ; i ++){
+        float s = rand_interval();
+        float size = 0.5+s;
+        sizes.push_back(size);
+            }
+        }
+
 mesh create_moss(){
     mesh moss = mesh_primitive_sphere(0.05, {0,0,0}, 100, 100);
     return moss;

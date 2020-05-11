@@ -25,8 +25,10 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     //Create moss
     moss = create_moss();
+    moss.uniform.shading.specular = 0.0f; // non-specular terrain material
     moss.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/moss.png"));
     update_position(500,moss_positions,0, gui_scene);
+    update_size(500, moss_sizes);
 
 }
 
@@ -64,8 +66,9 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-    for (vec3 position : moss_positions){
-        moss.uniform.transform.translation = position;
+    for (float i = 0 ; i < moss_positions.size() ; i ++){
+        moss.uniform.transform.scaling = moss_sizes[i];
+        moss.uniform.transform.translation = moss_positions[i];
         draw(moss, scene.camera, shaders["mesh"]);
     }
 
