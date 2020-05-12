@@ -70,7 +70,7 @@ void update_size(int N, std::vector<float>& sizes){
         }
 
 mesh create_moss(){
-    mesh moss = mesh_primitive_sphere(0.05, {0,0,0}, 100, 100);
+    mesh moss = mesh_primitive_sphere(0.03, {0,0,0}, 100, 100);
     return moss;
     }
 
