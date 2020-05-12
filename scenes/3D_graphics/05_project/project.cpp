@@ -39,8 +39,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     //Create reed
     reed = create_reed();
     reed.uniform.shading = {1,0,0}; // set pure ambiant component (no diffuse, no specular) - allow to only see the color of the texture
-    reed.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/billboard_reed.png"), GL_REPEAT, GL_REPEAT);
-    update_position_river(500, reed_positions, 0, gui_scene);
+    reed.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/billboard_reed_2.png"), GL_REPEAT, GL_REPEAT);
+    update_position_river(1500, reed_positions, 0, gui_scene);
 }
 
 
@@ -106,7 +106,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     for (float i = 0 ; i < reed_positions.size() ; i ++){
         reed.uniform.transform.rotation = scene.camera.orientation;
-        reed.uniform.transform.translation = reed_positions[i];
+        reed.uniform.transform.translation = reed_positions[i] + vec3({0.0, 0.0, -0.05});
         draw(reed, scene.camera, shaders["mesh"]);
     }
 
