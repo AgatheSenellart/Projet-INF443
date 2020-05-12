@@ -2,6 +2,7 @@
 using namespace vcl;
 
 
+
 // Evaluate 3D position of the terrain for any (u,v) \in [0,1]
 vec3 evaluate_terrain(float u, float v, const gui_scene_structure& gui_scene)
 {
@@ -158,4 +159,48 @@ mesh create_cliff(){
     cliff.connectivity.push_back({total*H + size_A + size_B,total*H + size_A + size_B + size_C, total*H});
 
     return cliff;
+}
+
+
+// Generate terrain mesh
+mesh create_water(const gui_scene_structure& gui_scene)
+{
+    // Number of samples of the terrain is N x N
+    const size_t N = 100;
+
+    mesh water; // temporary terrain storage (CPU only)
+    water.position.resize(N*N);
+
+    // Fill terrain geometry
+    for(size_t ku=0; ku<N; ++ku)
+    {
+        for(size_t kv=0; kv<N; ++kv)
+        {
+            // Compute local parametric coordinates (u,v) \in [0,1]
+            const float u = ku/(N-1.0f);
+            const float v = kv/(N-1.0f);
+
+            water.position[kv+N*ku] = {20*(u-0.5f), 20*(v-0.5f), 0.0f};
+        }
+    }
+
+
+    // Generate triangle organization
+    //  Parametric surface with uniform grid sampling: generate 2 triangles for each grid cell
+    const unsigned int Ns = N;
+    for(unsigned int ku=0; ku<Ns-1; ++ku)
+    {
+        for(unsigned int kv=0; kv<Ns-1; ++kv)
+        {
+            const unsigned int idx = kv + N*ku; // current vertex offset
+
+            const uint3 triangle_1 = {idx, idx+1+Ns, idx+1};
+            const uint3 triangle_2 = {idx, idx+Ns, idx+1+Ns};
+
+            water.connectivity.push_back(triangle_1);
+            water.connectivity.push_back(triangle_2);
+        }
+    }
+
+    return water;
 }

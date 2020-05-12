@@ -1,6 +1,8 @@
 #include "project.hpp"
 #include "global_setting_modeling_functions.hpp"
 #include "plants_modeling_functions.hpp"
+using namespace vcl;
+
 #ifdef PROJECT
 
 /** This function is called before the beginning of the animation loop
@@ -23,13 +25,22 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     cliff.uniform.color = {0.8f,0.0f,0.0f};
     cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff.png"));
 
+    //Create water
+    water = create_water(gui_scene);
+    water.uniform.color = {0.0, 0.0, 1.0};
+
     //Create moss
     moss = create_moss();
     moss.uniform.shading.specular = 0.0f; // non-specular terrain material
     moss.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/moss.png"));
-    update_position(500,moss_positions,0, gui_scene);
+    update_position_forest(500,moss_positions,0, gui_scene);
     update_size(500, moss_sizes);
 
+    //Create reed
+    reed = create_reed();
+    reed.uniform.shading = {1,0,0}; // set pure ambiant component (no diffuse, no specular) - allow to only see the color of the texture
+    reed.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/billboard_reed.png"), GL_REPEAT, GL_REPEAT);
+    update_position_river(500, reed_positions, 0, gui_scene);
 }
 
 
@@ -50,6 +61,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     draw(surface, scene.camera, shaders["mesh"]);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
+
+    // Display water
+    draw(water, scene.camera, shaders["mesh"]);
 
     // Display cliff
     glBindTexture(GL_TEXTURE_2D, cliff.texture_id);
@@ -74,6 +89,30 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
+
+    // Diplay reed (LAST DISPLAY)
+
+    glEnable(GL_BLEND); // Enable use of alpha component as color blending for transparent elements
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Disable depth buffer writing
+    //  - Transparent elements cannot use depth buffer
+    //  - They are supposed to be display from furest to nearest elements
+    glDepthMask(false);
+
+    glBindTexture(GL_TEXTURE_2D, reed.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+
+    for (float i = 0 ; i < reed_positions.size() ; i ++){
+        reed.uniform.transform.rotation = scene.camera.orientation;
+        reed.uniform.transform.translation = reed_positions[i];
+        draw(reed, scene.camera, shaders["mesh"]);
+    }
+
+
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glDepthMask(true);
 
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI

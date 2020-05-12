@@ -1,6 +1,7 @@
 #pragma once
 #include "main/scene_base/base.hpp"
 #ifdef PROJECT
+using namespace vcl;
 
 struct gui_scene_structure
 {
@@ -30,12 +31,16 @@ struct scene_model : scene_base
     void frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
 
     //  List of class attributes to be initialized in setup_data and used in frame_draw
-    vcl::mesh_drawable surface;
-    vcl::mesh_drawable cliff;
-    vcl::mesh_drawable moss;
+    mesh_drawable surface;
+    mesh_drawable water;
+    mesh_drawable cliff;
+    mesh_drawable moss;
+    mesh_drawable reed;
+
 
     std::vector<vcl::vec3> moss_positions;
     std::vector<float> moss_sizes;
+    std::vector<vcl::vec3> reed_positions;
 
     void set_gui();
 
