@@ -59,10 +59,18 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     branche = vcl::branche(taille_branche);
     feuille = vcl::feuille(taille_branche);
     branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
-    update_position_forest(30, tree_positions ,10*taille_branche, gui_scene);
-    //Structure de l'arbre
-    basic = grammar_tree(4);
-    fill_coordinates(basic,taille_branche); 
+    update_position_forest(25, tree_positions ,10*taille_branche, gui_scene);
+    //Structure des arbres
+    for (int i = 0; i < 10; i++)
+    {
+        noeud* arbre = grammar_tree(4);
+        fill_coordinates(arbre, taille_branche);
+        tree_structures.push_back(arbre);
+    }
+    // un arbre plus grand à côté de la maison
+    grand_arbre = grammar_tree(5);
+    fill_coordinates(grand_arbre, taille_branche);
+    
 }
 
 
@@ -180,8 +188,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        draw(basic, scene.camera, branche, feuille,tree_positions[i]);
+        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
+    // Display tree
+    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.1f, 0.8f,gui_scene));
 
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI

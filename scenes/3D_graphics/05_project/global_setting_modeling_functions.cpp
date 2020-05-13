@@ -23,7 +23,7 @@ mesh create_terrain(const gui_scene_structure& gui_scene)
             const float v = kv/(N-1.0f);
 
             terrain.position[kv+N*ku] = evaluate_terrain(u,v, gui_scene);
-            terrain.texture_uv[kv+N*ku] = {2*u,2*v};
+            terrain.texture_uv[kv+N*ku] = {4*u,4*v};
         }
     }
 

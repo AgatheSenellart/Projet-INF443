@@ -62,16 +62,18 @@ namespace vcl {
 		// on suppose la matrice T de la racine comme renseignée
 		if (n == 0) return;
 		if (n->length == 0) return;
+		// matrice de dilatation à faire avant la matrice T
+		n->length = n->length * rand_interval(0.8f, 1.3f);
 		// angle 
 		float alpha = 3.14f / 4.0f;
 		// On définit les matrices de transformations locales
 		// pour la première branche en bas
 		vcl::affine_transform T1;
-		T1.translation = { 0,0,taille_branche * n->length / 2.0f };
+		T1.translation = { 0,0,taille_branche * n->length* rand_interval(0.5f,0.8f)};
 		T1.rotation = rotation_between_vector_mat3(vec3(0, 0, 1.0f), vec3(sin(0.40), 0, cos(0.40)));
 		// Pour la deuxième branche 
 		vcl::affine_transform T4;
-		T4.translation = { 0,0,taille_branche * n->length *0.7f };
+		T4.translation = { 0,0,taille_branche * n->length *rand_interval(0.6f,0.9f) };
 		T4.rotation = rotation_between_vector_mat3(vec3(0, 0, 1.0f), vec3(sin(0.52)*cos(2*3.14f/2), sin(0.52)*sin(2*3.14f/2), cos(0.52)));
 		// Pour les deux branches en haut
 		vcl::affine_transform T2;
@@ -90,6 +92,12 @@ namespace vcl {
 		n->fils3->T = (n->T) *R* T3; 
 		n->fils2->T = (n->T) *R* T2;
 		n->fils4->T = (n->T) *R* T4;
+
+		//affine_transform dilatation;
+		affine_transform dilatation;
+		float ratio = rand_interval(0.9f, 1.5f);
+		dilatation.scaling_axis = vec3(n->length * ratio, n->length * ratio, n->length);
+		n->T = (n->T) * dilatation;
 		
 
 		//Récursion
@@ -101,10 +109,11 @@ namespace vcl {
 	mesh_drawable branche(float taille_branche)
 	{
 		
-		mesh branche_cpu = mesh_primitive_cylinder(0.03f);
+		mesh branche_cpu = mesh_primitive_cylinder(0.03f * taille_branche, { 0,0,0 }, { 0,0,taille_branche });
+		mesh haut_branche = mesh_primitive_sphere(0.03f*taille_branche, { 0,0,taille_branche });
+		branche_cpu.push_back(haut_branche);
 		mesh_drawable branche = branche_cpu;
 		branche.uniform.color = { 0.4f,0.2f, 0.0f };
-		branche.uniform.transform.scaling = taille_branche;
 		return branche;
 		//attention les shaders ne sont pas définis
 	}
@@ -112,12 +121,12 @@ namespace vcl {
 	mesh_drawable feuille(float taille_branche)
 	{
 		mesh feuille_cpu;
-		feuille_cpu.position = { {-0.15f,-0.5f,1}, {0,0,2.0f}, {-0.15f,0.5f,1}, {0,0,0.0f} };
+		float taille = 0.35f*taille_branche;
+		feuille_cpu.position = { {taille* -0.15f,taille* -0.5f,taille}, {0,0,2.0f*taille}, {-0.15f*taille,0.5f*taille,taille}, {0,0,0.0f} };
 		feuille_cpu.connectivity = { {0,1,2},{2,3,0} };
 		feuille_cpu.normal = { {1,-0.05f,0},{1, 0.05f,0} };
 		mesh_drawable feuille = feuille_cpu;
 		feuille.uniform.color = { 0.2f,0.4f,0.0f };
-		feuille.uniform.transform.scaling = 0.02f*taille_branche/0.05f;
 		return feuille;
 	}
 
@@ -146,18 +155,14 @@ namespace vcl {
 		if (arbre->length == 0)
 		{
 			visual_element = feuille;
-			visual_element.uniform.transform = translation*(arbre->T) * feuille.uniform.transform;
+			visual_element.uniform.transform = translation * (arbre->T);
 		}
-		
 		else
 		{
 			visual_element = branche;
-			affine_transform dilatation;
-			dilatation.scaling_axis = vec3(arbre->length, arbre->length, arbre->length);
-			visual_element.uniform.transform = translation*(arbre->T) * dilatation * branche.uniform.transform;
+			visual_element.uniform.transform = translation * (arbre->T);
+
 		}
-		
-		
 
 		vcl::draw(visual_element, camera);
 		if (arbre->length == 0) return;
