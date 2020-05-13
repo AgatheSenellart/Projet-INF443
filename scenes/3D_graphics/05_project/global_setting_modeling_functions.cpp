@@ -47,7 +47,7 @@ vec3 evaluate_terrain(float u, float v, const gui_scene_structure& gui_scene)
     const float noise = perlin(scaling*u, scaling*v, octave, persistency);
 
 
-    return {x,y,0.7*z + 0.3*noise};
+    return {x,y,0.7f*z + 0.3f*noise};
 }
 
 // Generate terrain mesh
@@ -118,22 +118,22 @@ mesh create_cliff(){
     for(size_t kz = 0; kz < H+1; ++kz){
         for (unsigned int i = 0; i < total; i++){
             if (i < size_A){ //side_A
-                cliff.position[kz*total + i] = {- (i/size_Af)*0.3, 0, 0.3*kz/Hf};
-                cliff.texture_uv[kz*total + i] = {kz,i};
+                cliff.position[kz*total + i] = {- (i/size_Af)*0.3f, 0, 0.3f*kz/Hf};
+                cliff.texture_uv[kz*total + i] = {kz*1.0f,1.0f*i};
             }
             if ((i >= size_A) && (i < size_A + size_B)){//side B
-                cliff.position[kz*total + i] = {-0.3, - (i-size_Af)*0.1 / size_Bf, 0.3*kz/Hf};
-                cliff.texture_uv[kz*total + i] = {kz,i};
+                cliff.position[kz*total + i] = {-0.3f, - (i-size_Af)*0.1f / size_Bf, 0.3f*kz/Hf};
+                cliff.texture_uv[kz*total + i] = { kz * 1.0f,1.0f * i };
             }
             if ((i >= size_A + size_B) && (i < size_A + size_B + size_C)){//side C
-                float x = - 0.3 + 0.3*(i - size_Af - size_Bf) / size_Cf;
-                float y = -4./3.*x - 0.5;
-                cliff.position[kz*total + i] = {x, y, 0.3*kz/Hf};
-                cliff.texture_uv[kz*total + i] = {kz,i};
+                float x = - 0.3f + 0.3f*(i - size_Af - size_Bf) / size_Cf;
+                float y = -4./3.0f*x - 0.5f;
+                cliff.position[kz*total + i] = {x, y, 0.3f*kz/Hf};
+                cliff.texture_uv[kz*total + i] = { kz * 1.0f,1.0f * i };
             }
             if (i >= size_A + size_B + size_C){//side D
-                cliff.position[kz*total + i] = {0, -0.5 + 0.5*(i - size_Af - size_Bf - size_Cf)/size_Df, 0.3*kz/Hf};
-                cliff.texture_uv[kz*total + i] = {kz,i};
+                cliff.position[kz*total + i] = {0, -0.5f + 0.5f*(i - size_Af - size_Bf - size_Cf)/size_Df, 0.3f*kz/Hf};
+                cliff.texture_uv[kz*total + i] = { kz * 1.0f,1.0f * i };
             }
         }
     }
