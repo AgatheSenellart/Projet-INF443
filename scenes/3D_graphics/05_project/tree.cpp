@@ -1,6 +1,7 @@
 #include "vcl/math/transformation/affine_transform/affine_transform.hpp"
 #include "vcl/math/transformation/special_transform/special_transform.hpp"
 #include "vcl/shape/mesh/mesh_drawable/mesh_drawable.hpp"
+#include "vcl/shape/mesh/mesh_primitive/mesh_primitive.hpp"
 #include "tree.hpp"
 
 
@@ -94,6 +95,40 @@ namespace vcl {
 
 
 
+	}
+	mesh_drawable branche()
+	{
+		float taille_branche = 0.05f;
+		mesh branche_cpu = mesh_primitive_cylinder(0.03f);
+		mesh_drawable branche = branche_cpu;
+		branche.uniform.color = { 0.8f,0.6f, 0.0f };
+		branche.uniform.transform.scaling = taille_branche;
+		return branche;
+		//attention les shaders ne sont pas définis
+	}
+
+	mesh_drawable feuille()
+	{
+		mesh feuille_cpu;
+		feuille_cpu.position = { {-0.15f,-0.5f,1}, {0,0,2.0f}, {-0.15f,0.5f,1}, {0,0,0.0f} };
+		feuille_cpu.connectivity = { {0,1,2},{2,3,0} };
+		feuille_cpu.normal = { {1,-0.05f,0},{1, 0.05f,0} };
+		mesh_drawable feuille = feuille_cpu;
+		feuille.uniform.color = { 0.0f,1.0f,0.0f };
+		feuille.uniform.transform.scaling = 0.02f;
+		return feuille;
+	}
+
+	// Create a tree using the grammar 
+	noeud* grammar_tree(int level)
+	{
+		noeud* basic(0);
+		basic = new_bourgeon();
+		for (int i = 0; i < level; i++)
+		{
+			apply_grammar(basic);
+		}
+		return basic;
 	}
 
 	void draw(const noeud* arbre, const camera_scene& camera, mesh_drawable branche, mesh_drawable feuille)

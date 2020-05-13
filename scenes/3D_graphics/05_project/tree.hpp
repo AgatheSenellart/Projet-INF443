@@ -21,7 +21,13 @@ namespace vcl {
 
 	noeud* new_bourgeon();
 	noeud* new_branche(int length);
+	mesh_drawable branche();
 
+	mesh_drawable feuille();
+
+	// Create a tree using the grammar 
+	noeud* grammar_tree(int level);
+	
 	void apply_grammar(noeud* n);
 	
 
