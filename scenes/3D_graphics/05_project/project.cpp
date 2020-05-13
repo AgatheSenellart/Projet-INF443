@@ -1,7 +1,7 @@
 #include "project.hpp"
 #include "global_setting_modeling_functions.hpp"
 #include "plants_modeling_functions.hpp"
-#include "human_activity_modeling_functions.hpp"
+#include "tree.hpp"
 using namespace vcl;
 
 #ifdef PROJECT
@@ -38,20 +38,19 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     update_position_forest(500,moss_positions,0, gui_scene);
     update_size(500, moss_sizes);
 
-    //Create wall
-    wall_size = 1.0;
-    wall = create_wall(wall_size);
-    wall_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_mur_simple.png"));
-    wall_window_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_fenetre.png"));
-    wall_window_door_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_porte_fenetre.png"));
-    roof_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_toit.png"));
-
     //Create reed
     reed = create_reed();
     reed.uniform.shading = {1,0,0}; // set pure ambiant component (no diffuse, no specular) - allow to only see the color of the texture
-    reed.uniform.transform.scaling = 0.5;
     reed.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/billboard_reed_2.png"), GL_REPEAT, GL_REPEAT);
     update_position_river(1500, reed_positions, 0, gui_scene);
+
+    //Mesh_drawable elements for the trees
+
+    branche = vcl::branche();
+    feuille = vcl::feuille();
+    branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
+    
+
 }
 
 
@@ -97,47 +96,6 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         moss.uniform.transform.translation = moss_positions[i];
         draw(moss, scene.camera, shaders["mesh"]);
     }
-
-    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
-
-    //Display hut
-
-    float angle = -3.14/6;
-
-    glBindTexture(GL_TEXTURE_2D, wall_window_door_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene);
-    draw(wall, scene.camera, shaders["mesh"]);
-
-    glBindTexture(GL_TEXTURE_2D, wall_window_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    angle = angle - 3.14/2;
-    wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene);
-    draw(wall, scene.camera, shaders["mesh"]);
-
-    glBindTexture(GL_TEXTURE_2D, wall_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({std::cos(3.14/6)*wall_size, std::sin(3.14/6)*wall_size, 0});
-    draw(wall, scene.camera, shaders["mesh"]);
-
-    angle = angle + 3.14/2;
-    wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({-std::cos(3.14/3)*wall_size, std::sin(3.14/3)*wall_size, 0});
-    draw(wall, scene.camera, shaders["mesh"]);
-
-    glBindTexture(GL_TEXTURE_2D, roof_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {0, 0, 1.0},{std::sin(angle),std::cos(angle), 0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({0.0, 0.0,wall_size});
-    draw(wall, scene.camera, shaders["mesh"]);
-
 
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
