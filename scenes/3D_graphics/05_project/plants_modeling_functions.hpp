@@ -1,6 +1,5 @@
 #include "main/scene_base/base.hpp"
 #include "project.hpp"
-
 using namespace vcl;
 
 

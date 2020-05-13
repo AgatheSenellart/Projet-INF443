@@ -23,8 +23,9 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     //Create cliff
     cliff = create_cliff();
-    cliff.uniform.color = {0.8f,0.0f,0.0f};
-    cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff.png"));
+    cliff.uniform.color = {1.0f,1.0f,1.0f};
+    cliff.uniform.shading.ambiant = 0.8f;
+    cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff_4.png"));
 
     //Create water
     water = create_water(gui_scene);
