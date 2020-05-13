@@ -19,10 +19,14 @@ void update_position_forest(int N, std::vector<vcl::vec3>& positions, float min_
             float x = position[0];
             float y = position[1];
             float z = position[2];
-            for (vec3 position : positions){
-                float distance_2 = (x-position[0])*(x-position[0]) + (y-position[1])*(y-position[1]) + (z-position[2])*(z-position[2]);
-                if (distance_2 < min_distance*min_distance){
-                    far_enough = false;
+            
+            if (positions.size() > 0)
+            {
+                for (vec3 p : positions) {
+                    float distance_2 = (x - p[0]) * (x - p[0]) + (y - p[1]) * (y - p[1]) + (z - p[2]) * (z - p[2]);
+                    if (distance_2 < min_distance * min_distance) {
+                        far_enough = false;
+                    }
                 }
             }
             if (far_enough){

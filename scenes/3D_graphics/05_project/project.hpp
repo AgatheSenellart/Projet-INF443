@@ -1,5 +1,6 @@
 #pragma once
 #include "main/scene_base/base.hpp"
+#include "tree.hpp"
 #ifdef PROJECT
 using namespace vcl;
 
@@ -37,12 +38,19 @@ struct scene_model : scene_base
     mesh_drawable moss;
     mesh_drawable reed;
     mesh_drawable wall;
+    mesh_drawable branche;
+    mesh_drawable feuille;
     float wall_size;
 
 
     std::vector<vcl::vec3> moss_positions;
     std::vector<float> moss_sizes;
     std::vector<vcl::vec3> reed_positions;
+    std::vector<vcl::vec3> tree_positions;
+
+    //tree structure
+    vcl::noeud* basic;
+
 
     GLuint wall_texture;
     GLuint wall_window_texture;

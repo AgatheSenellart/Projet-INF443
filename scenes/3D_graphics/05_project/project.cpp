@@ -2,6 +2,7 @@
 #include "global_setting_modeling_functions.hpp"
 #include "plants_modeling_functions.hpp"
 #include "human_activity_modeling_functions.hpp"
+
 using namespace vcl;
 
 #ifdef PROJECT
@@ -29,7 +30,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     //Create water
     water = create_water(gui_scene);
-    water.uniform.color = {0.0, 0.0, 1.0};
+    water.uniform.color = {0.2f, 0.6, 1.0};
 
     //Create moss
     moss = create_moss();
@@ -44,7 +45,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     wall_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_mur_simple.png"));
     wall_window_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_fenetre.png"));
     wall_window_door_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_porte_fenetre.png"));
-    roof_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_toit.png"));
+    roof_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/toit.png"));
 
     //Create reed
     reed = create_reed();
@@ -52,6 +53,16 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     reed.uniform.transform.scaling = 0.5;
     reed.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/billboard_reed_2.png"), GL_REPEAT, GL_REPEAT);
     update_position_river(1500, reed_positions, 0, gui_scene);
+
+    //Create visual elements for the trees
+    float taille_branche = 0.3f;
+    branche = vcl::branche(taille_branche);
+    feuille = vcl::feuille(taille_branche);
+    branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
+    update_position_forest(30, tree_positions ,10*taille_branche, gui_scene);
+    //Structure de l'arbre
+    basic = grammar_tree(4);
+    fill_coordinates(basic,taille_branche); 
 }
 
 
@@ -123,12 +134,12 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({std::cos(3.14/6)*wall_size, std::sin(3.14/6)*wall_size, 0});
+    wall.uniform.transform.translation = evaluate_terrain(0.2f, 0.8f, gui_scene) + vec3({std::cos(3.14f/6)*wall_size, std::sin(3.14f/6)*wall_size, 0});
     draw(wall, scene.camera, shaders["mesh"]);
 
     angle = angle + 3.14/2;
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({-std::cos(3.14/3)*wall_size, std::sin(3.14/3)*wall_size, 0});
+    wall.uniform.transform.translation = evaluate_terrain(0.2f, 0.8f, gui_scene) + vec3({-std::cos(3.14f/3)*wall_size, std::sin(3.14f/3)*wall_size, 0});
     draw(wall, scene.camera, shaders["mesh"]);
 
     glBindTexture(GL_TEXTURE_2D, roof_texture);
@@ -165,6 +176,12 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     glDepthMask(true);
+
+    // Display forest
+    for (size_t i = 0; i < tree_positions.size(); i++)
+    {
+        draw(basic, scene.camera, branche, feuille,tree_positions[i]);
+    }
 
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI

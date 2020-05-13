@@ -19,11 +19,14 @@ namespace vcl {
 
 	};
 
+	
+	
+
 	noeud* new_bourgeon();
 	noeud* new_branche(int length);
-	mesh_drawable branche();
+	mesh_drawable branche(float taille_branche);
 
-	mesh_drawable feuille();
+	mesh_drawable feuille(float taille_branche);
 
 	// Create a tree using the grammar 
 	noeud* grammar_tree(int level);
@@ -33,7 +36,7 @@ namespace vcl {
 
 	void fill_coordinates(noeud* n, float taille_branche);
 
-	void draw(const noeud* arbre, const camera_scene& camera, mesh_drawable branche,mesh_drawable feuille);
+	void draw(const noeud* arbre, const camera_scene& camera, mesh_drawable branche,mesh_drawable feuille, vec3 position);
 
 
 }

@@ -6,6 +6,8 @@
 
 
 namespace vcl {
+
+	
 	
 
 	noeud* new_bourgeon() {
@@ -30,13 +32,13 @@ namespace vcl {
 
 	void apply_grammar(noeud* n)
 	{
-		float taille_branche = 1.0f;
+		
 
 		if (n == nullptr) return;
 		// Si c'est un bourgeon ça devient une branche
 		if (n->length == 0)
 		{
-			n->length = taille_branche;
+			n->length =1.0f;
 			// on ajoute trois nouveaux bourgeons
 			n->fils1 = new_bourgeon();
 			n->fils2 = new_bourgeon();
@@ -55,7 +57,7 @@ namespace vcl {
 		}
 	}
 
-	void fill_coordinates(noeud* n, float taille_branche)
+	void fill_coordinates(noeud* n,float taille_branche)
 	{	// Dans cette fonction on remplit les coordonnées T de chaque noeud de l'arbre
 		// on suppose la matrice T de la racine comme renseignée
 		if (n == 0) return;
@@ -91,31 +93,31 @@ namespace vcl {
 		
 
 		//Récursion
-		fill_coordinates(n->fils1, taille_branche); fill_coordinates(n->fils2, taille_branche); fill_coordinates(n->fils3, taille_branche); fill_coordinates(n->fils4, taille_branche);
+		fill_coordinates(n->fils1,taille_branche); fill_coordinates(n->fils2,taille_branche); fill_coordinates(n->fils3,taille_branche); fill_coordinates(n->fils4,taille_branche);
 
 
 
 	}
-	mesh_drawable branche()
+	mesh_drawable branche(float taille_branche)
 	{
-		float taille_branche = 0.05f;
+		
 		mesh branche_cpu = mesh_primitive_cylinder(0.03f);
 		mesh_drawable branche = branche_cpu;
-		branche.uniform.color = { 0.8f,0.6f, 0.0f };
+		branche.uniform.color = { 0.4f,0.2f, 0.0f };
 		branche.uniform.transform.scaling = taille_branche;
 		return branche;
 		//attention les shaders ne sont pas définis
 	}
 
-	mesh_drawable feuille()
+	mesh_drawable feuille(float taille_branche)
 	{
 		mesh feuille_cpu;
 		feuille_cpu.position = { {-0.15f,-0.5f,1}, {0,0,2.0f}, {-0.15f,0.5f,1}, {0,0,0.0f} };
 		feuille_cpu.connectivity = { {0,1,2},{2,3,0} };
 		feuille_cpu.normal = { {1,-0.05f,0},{1, 0.05f,0} };
 		mesh_drawable feuille = feuille_cpu;
-		feuille.uniform.color = { 0.0f,1.0f,0.0f };
-		feuille.uniform.transform.scaling = 0.02f;
+		feuille.uniform.color = { 0.2f,0.4f,0.0f };
+		feuille.uniform.transform.scaling = 0.02f*taille_branche/0.05f;
 		return feuille;
 	}
 
@@ -131,17 +133,20 @@ namespace vcl {
 		return basic;
 	}
 
-	void draw(const noeud* arbre, const camera_scene& camera, mesh_drawable branche, mesh_drawable feuille)
+	void draw(const noeud* arbre, const camera_scene& camera, mesh_drawable branche, mesh_drawable feuille, vec3 position)
 	{
 		if (arbre == 0) { return; }
 		
 		// on déclare l'élement visuel à dessiner
 		mesh_drawable visual_element;
-		
+		// la position de l'arbre
+		affine_transform translation;
+		translation.translation = position;
+
 		if (arbre->length == 0)
 		{
 			visual_element = feuille;
-			visual_element.uniform.transform = (arbre->T) * feuille.uniform.transform;
+			visual_element.uniform.transform = translation*(arbre->T) * feuille.uniform.transform;
 		}
 		
 		else
@@ -149,13 +154,17 @@ namespace vcl {
 			visual_element = branche;
 			affine_transform dilatation;
 			dilatation.scaling_axis = vec3(arbre->length, arbre->length, arbre->length);
-			visual_element.uniform.transform = (arbre->T) * dilatation * branche.uniform.transform;
+			visual_element.uniform.transform = translation*(arbre->T) * dilatation * branche.uniform.transform;
 		}
+		
+		
+
 		vcl::draw(visual_element, camera);
-		draw(arbre->fils1, camera, branche,feuille);
-		draw(arbre->fils2, camera, branche,feuille);
-		draw(arbre->fils3, camera, branche,feuille);
-		draw(arbre->fils4, camera, branche,feuille);
+		if (arbre->length == 0) return;
+		draw(arbre->fils1, camera, branche,feuille,position);
+		draw(arbre->fils2, camera, branche,feuille,position);
+		draw(arbre->fils3, camera, branche,feuille,position);
+		draw(arbre->fils4, camera, branche,feuille,position);
 	}
 
 
