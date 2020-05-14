@@ -35,7 +35,7 @@ namespace vcl {
 		
 
 		if (n == nullptr) return;
-		// Si c'est un bourgeon ça devient une branche
+        // Si c'est un bourgeon ca devient une branche
 		if (n->length == 0)
 		{
 			n->length =1.0f;
@@ -46,7 +46,7 @@ namespace vcl {
 			n->fils4 = new_bourgeon();
 			return;
 		}
-		// Si c'est une branche on double sa longueur et on récurse
+        // Si c est une branche on double sa longueur et on recurse
 		if (n->length != 0)
 		{
 			n->length = 1.7f * n->length;
@@ -58,8 +58,8 @@ namespace vcl {
 	}
 
 	void fill_coordinates(noeud* n,float taille_branche)
-	{	// Dans cette fonction on remplit les coordonnées T de chaque noeud de l'arbre
-		// on suppose la matrice T de la racine comme renseignée
+    {	// Dans cette fonction on remplit les coordonnées T de chaque noeud de l arbre
+        // on suppose la matrice T de la racine comme renseignee
 		if (n == 0) return;
 		if (n->length == 0) return;
 		// matrice de dilatation à faire avant la matrice T

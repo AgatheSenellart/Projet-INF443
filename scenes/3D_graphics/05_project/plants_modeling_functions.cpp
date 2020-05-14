@@ -9,12 +9,13 @@ void update_position_forest(int N, std::vector<vcl::vec3>& positions, float min_
         float u = rand_interval();
         float v = rand_interval();
 
-        float detect_river = v - 1.8*u;
+        float detect_river = v - 1.8f*u;
         float detect_sea = u - std::cos(4*v);
+        float detect_cliff = v + 4.f/3.f*u;
 
 
 
-        if (((-0.95 > detect_river) || -0.75 < (detect_river)) && (detect_sea > 0)){
+        if (((-0.95 > detect_river) || -0.75 < (detect_river)) && (detect_sea > 0) && (detect_cliff < 1.5)){
             vec3 position = evaluate_terrain(u,v, gui_scene);
             float x = position[0];
             float y = position[1];

@@ -96,7 +96,7 @@ vec3 evaluate_terrain(float u, float v, const gui_scene_structure& gui_scene)
 }
 
 
-mesh create_cliff(){
+mesh create_cliff(const gui_scene_structure& gui_scene){
 
     const size_t size_A = 30;
     const float size_Af = 30.0;
@@ -106,9 +106,10 @@ mesh create_cliff(){
     const float size_Cf = 50.0;
     const size_t size_D = 50;
     const float size_Df = 50.0;
-    const size_t H = 30;
-    const float Hf = 30.0;
+    const size_t H = 60;
+    const float Hf = 60.0;
     const size_t total = size_A + size_B + size_C + size_D;
+    const float totalf = size_Af + size_Bf + size_Cf + size_Df;
 
     mesh cliff;
     cliff.position.resize(total*(H+1) + (size_A - 1)*(size_B-1));
@@ -120,23 +121,43 @@ mesh create_cliff(){
             float kz_texture = 0.03*kz;
             float i_texture = 0.03*i;
             if (i < size_A){ //side_A
-                cliff.position[kz*total + i] = {- (i/size_Af)*0.3f, 0, 0.3f*kz/Hf};
+                cliff.position[kz*total + i] = {- (i/size_Af)*0.3f, 0, 0.6f*kz/Hf};
                 cliff.texture_uv[kz*total + i] = {kz_texture,i_texture};
             }
             if ((i >= size_A) && (i < size_A + size_B)){//side B
-                cliff.position[kz*total + i] = {-0.3f, - (i-size_Af)*0.1f / size_Bf, 0.3f*kz/Hf};
+                cliff.position[kz*total + i] = {-0.3f, - (i-size_Af)*0.1f / size_Bf, 0.6f*kz/Hf};
                 cliff.texture_uv[kz*total + i] = {kz_texture,i_texture};
             }
             if ((i >= size_A + size_B) && (i < size_A + size_B + size_C)){//side C
                 float x = - 0.3 + 0.3*(i - size_Af - size_Bf) / size_Cf;
                 float y = -4./3.*x - 0.5;
-                cliff.position[kz*total + i] = {x, y, 0.3f*kz/Hf};
+                cliff.position[kz*total + i] = {x, y, 0.6f*kz/Hf};
                 cliff.texture_uv[kz*total + i] = {kz_texture,i_texture};
             }
             if (i >= size_A + size_B + size_C){//side D
-                cliff.position[kz*total + i] = {0, -0.5f + 0.5f*(i - size_Af - size_Bf - size_Cf)/size_Df, 0.3f*kz/Hf};
+                cliff.position[kz*total + i] = {0, -0.5f + 0.5f*(i - size_Af - size_Bf - size_Cf)/size_Df, 0.6f*kz/Hf};
                 cliff.texture_uv[kz*total + i] = {kz_texture,i_texture};
             }
+        }
+    }
+
+    // get gui parameters
+    const float scaling = gui_scene.scaling;
+    const int octave = gui_scene.octave;
+    const float persistency = gui_scene.persistency;
+    const float height = gui_scene.height;
+
+
+    for(size_t kz = 0; kz < H+1; ++kz){
+        for (unsigned int i = 0; i < total; i++){
+
+            // Evaluate Perlin noise
+            const float noise = perlin(scaling*(kz/Hf + std::cos(i)), scaling*(i/totalf), octave, persistency);
+
+            float x = (cliff.position[kz*total + i])[0];
+            float y = (cliff.position[kz*total + i])[1];
+            float z = (cliff.position[kz*total + i])[2];
+            cliff.position[kz*total + i] = {x + 0.01*noise, y + 0.006*noise, z - 0.01*noise};
         }
     }
 

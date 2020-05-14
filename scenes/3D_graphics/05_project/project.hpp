@@ -38,6 +38,7 @@ struct scene_model : scene_base
     mesh_drawable moss;
     mesh_drawable reed;
     mesh_drawable wall;
+    mesh_drawable bridge;
     mesh_drawable branche;
     mesh_drawable feuille;
     float wall_size;

@@ -20,12 +20,13 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     // Setup initial camera mode and position
     scene.camera.camera_type = vcl::camera_control_spherical_coordinates;
     scene.camera.scale = 20.0f;
-    scene.camera.apply_rotation(0,0,0,1.2f);
+    scene.camera.apply_rotation(-1.0f,0,0,1.2f);
 
     //Create cliff
-    cliff = create_cliff();
+    cliff = create_cliff(gui_scene);
     cliff.uniform.color = {1.0f,1.0f,1.0f};
     cliff.uniform.shading.ambiant = 0.8f;
+    cliff.uniform.shading.specular = 0.0f;
     cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff_4.png"));
 
     //Create water
@@ -42,10 +43,15 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     //Create wall
     wall_size = 1.0;
     wall = create_wall(wall_size);
+    wall.uniform.shading.ambiant = 0.6f;
     wall_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_mur_simple.png"));
     wall_window_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_fenetre.png"));
     wall_window_door_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cabane_porte_fenetre.png"));
     roof_texture = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/toit.png"));
+
+    //Create bridge
+    bridge = create_bridge(1.0f, 2.5f);
+    bridge.uniform.shading.ambiant = 0.6f;
 
     //Create reed
     reed = create_reed();
@@ -59,7 +65,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     branche = vcl::branche(taille_branche);
     feuille = vcl::feuille(taille_branche);
     branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
-    update_position_forest(25, tree_positions ,10*taille_branche, gui_scene);
+    update_position_forest(70, tree_positions ,10*taille_branche, gui_scene);
     //Structure des arbres
     for (int i = 0; i < 10; i++)
     {
@@ -67,7 +73,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
         fill_coordinates(arbre, taille_branche);
         tree_structures.push_back(arbre);
     }
-    // un arbre plus grand à côté de la maison
+    // un arbre plus grand à cote de la maison
     grand_arbre = grammar_tree(5);
     fill_coordinates(grand_arbre, taille_branche);
     
@@ -97,12 +103,26 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     draw(water, scene.camera, shaders["mesh"]);
 
     // Display cliff
+    gui_scene.scaling = 4.f;
+    gui_scene.octave = 9;
+    gui_scene.persistency = 0.7f;
+
     glBindTexture(GL_TEXTURE_2D, cliff.texture_id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     cliff.uniform.transform.scaling = 30;
     cliff.uniform.transform.translation = vec3(10, 10, -1);
     draw(cliff, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
+    // Display bridge
+    glBindTexture(GL_TEXTURE_2D, roof_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    bridge.uniform.transform.translation = {1.7f, -3.0f, -0.1f};
+    float bridge_angle = 3.14/6;
+    bridge.uniform.transform.rotation = {{cos(bridge_angle), -sin(bridge_angle), 0}, {sin(bridge_angle), cos(bridge_angle), 0}, {0.0f, 0.0f, 1.0f}};
+    draw(bridge, scene.camera, shaders["mesh"]);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
 
@@ -191,7 +211,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display tree
-    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.1f, 0.8f,gui_scene));
+    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
 
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
