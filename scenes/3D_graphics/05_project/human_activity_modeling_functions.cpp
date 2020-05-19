@@ -32,7 +32,7 @@ mesh create_bridge(float h, float L)
             float x = (kn/Nf)*L;
             float z = -(4*h/std::pow(L,2))*pow(x,2) + (4*h/L)*x;
             bridge.position[(N+1)*ky+kn] = {x,(ky/Yf)*h,z};
-            bridge.texture_uv[(N+1)*ky+kn] = {ky,kn};
+            bridge.texture_uv[(N+1)*ky+kn] = {1.0f*ky,1.0f*kn};
         }
     }
 

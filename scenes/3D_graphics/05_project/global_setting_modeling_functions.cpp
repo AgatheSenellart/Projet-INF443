@@ -157,7 +157,7 @@ mesh create_cliff(const gui_scene_structure& gui_scene){
             float x = (cliff.position[kz*total + i])[0];
             float y = (cliff.position[kz*total + i])[1];
             float z = (cliff.position[kz*total + i])[2];
-            cliff.position[kz*total + i] = {x + 0.01*noise, y + 0.006*noise, z - 0.01*noise};
+            cliff.position[kz*total + i] = {x + 0.01f*noise, y + 0.006f*noise, z - 0.01f*noise};
         }
     }
 

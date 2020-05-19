@@ -61,11 +61,11 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     update_position_river(1500, reed_positions, 0, gui_scene);
 
     //Create visual elements for the trees
-    float taille_branche = 0.3f;
+    float taille_branche = 0.15f;
     branche = vcl::branche(taille_branche);
     feuille = vcl::feuille(taille_branche);
     branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
-    update_position_forest(70, tree_positions ,10*taille_branche, gui_scene);
+    update_position_forest(200, tree_positions ,2*taille_branche, gui_scene);
     //Structure des arbres
     for (int i = 0; i < 10; i++)
     {
@@ -74,6 +74,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
         tree_structures.push_back(arbre);
     }
     // un arbre plus grand à cote de la maison
+    taille_branche = 0.3f;
     grand_arbre = grammar_tree(5);
     fill_coordinates(grand_arbre, taille_branche);
     
