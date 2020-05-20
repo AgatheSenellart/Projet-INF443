@@ -208,6 +208,7 @@ mesh create_water(const gui_scene_structure& gui_scene)
 
     mesh water; // temporary terrain storage (CPU only)
     water.position.resize(N*N);
+    water.texture_uv.resize(N * N);
 
     // Fill terrain geometry
     for(size_t ku=0; ku<N; ++ku)
@@ -219,6 +220,7 @@ mesh create_water(const gui_scene_structure& gui_scene)
             const float v = kv/(N-1.0f);
 
             water.position[kv+N*ku] = {20*(u-0.5f), 20*(v-0.5f), 0.0f};
+            water.texture_uv[kv + N * ku] = { u,v };
         }
     }
 

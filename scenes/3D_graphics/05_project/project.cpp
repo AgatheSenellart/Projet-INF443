@@ -86,7 +86,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     grand_arbre = grammar_tree(5);
     fill_coordinates(grand_arbre, taille_branche);
 
-    timer.t_max = 500;
+    timer.t_max = 50;
     
 }
 
@@ -95,14 +95,14 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 /** This function is called at each frame of the animation loop.
     It is used to compute time-varying argument and perform data data drawing */
 void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& ){
-    
+
+    timer.update();
+    // Get local time
+    float t = timer.t;
+    std::cout << std::sin(t) << std::endl;  
 
     set_gui();
    
-    timer.update();
-    // Get local time
-    const float t = timer.t;
-    std::cout << t << std::endl;
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
@@ -129,9 +129,12 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     //glActiveTexture(GL_TEXTURE1);
     //glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, channel2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
     //Send the time to the shader;
-    const GLint time_loc = glGetUniformLocation(shaders["river"], "iTime");
+    glUseProgram(shaders["river"]);
+    const GLint time_loc = glGetUniformLocation(shaders["river"], "time");
     glUniform1f(time_loc, t);
 
     
@@ -256,6 +259,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display tree
     //draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
 
+    
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
         glPolygonOffset( 1.0, 1.0 );
