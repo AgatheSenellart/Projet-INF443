@@ -52,15 +52,24 @@ struct scene_model : scene_base
     //tree structure
     std::vector<noeud*> tree_structures;
     noeud* grand_arbre;
+
+    // Id for the water texture
+    GLuint channel0;
+    GLuint channel1;
+    GLuint channel2;
+
     
 
-
+    // textures' id for the hut
     GLuint wall_texture;
     GLuint wall_window_texture;
     GLuint wall_window_door_texture;
     GLuint roof_texture;
 
     void set_gui();
+
+    // timer setup
+    vcl::timer_interval timer;
 
     gui_scene_structure gui_scene;
 

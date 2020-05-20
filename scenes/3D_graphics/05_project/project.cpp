@@ -30,8 +30,16 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff_4.png"));
 
     //Create water
+
+    // Id for the multitexturing of the water
+    channel0 = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/channel0.png"));
+    channel1 = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/channel1.png"));
+    channel2 = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/channel2.png"));
+
+
     water = create_water(gui_scene);
     water.uniform.color = {0.2f, 0.6, 1.0};
+    water.shader = shaders["river"];
 
     //Create moss
     moss = create_moss();
@@ -85,8 +93,12 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 /** This function is called at each frame of the animation loop.
     It is used to compute time-varying argument and perform data data drawing */
 void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& ){
+    
 
     set_gui();
+    timer.update();
+    // Get local time
+    const float t = timer.t;
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
@@ -101,7 +113,33 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
 
     // Display water
-    draw(water, scene.camera, shaders["mesh"]);
+    //channel0
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, channel0);
+    //channel1
+    glActiveTexture(GL_TEXTURE1);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, channel1);
+    //channel2
+    glActiveTexture(GL_TEXTURE2);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, channel2);
+
+    //Send the time to the shader;
+    const GLint time_loc = glGetUniformLocation(shaders["river"], "iTime");
+    glUniform1f(time_loc, t);
+
+    
+    draw(water, scene.camera, shaders["river"]);
+
+    // put neutral texture again
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Display cliff
     gui_scene.scaling = 4.f;
