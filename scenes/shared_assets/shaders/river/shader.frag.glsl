@@ -10,9 +10,9 @@ in struct fragment_data
 
 
 uniform float iTime;
-uniform vec3 iResolution = vec3(10.0f,10.0f,10.0f);
-uniform sampler2D iChannel0;
-uniform sampler2D iChannel1;
+uniform vec3 iResolution = vec3(1000,1000,100);
+//uniform sampler2D iChannel0;
+//uniform sampler2D iChannel1;
 uniform sampler2D iChannel2;
 
 
@@ -20,21 +20,22 @@ out vec4 FragColor;
 
 
 float map(vec3 p) {
+	// le shader de base travaillait avec x et z mais j'ai remplacé par x et y puisque nous on travaille sur un plan horizontal
 	float t = iTime / 3.;
-	p.z += t * 2.; p.x += t * 2.;
-	vec4 c14 = texture(iChannel2, p.xz / 30.0f);
+	p.y += t * 2.; p.x += t * 2.;
+	vec4 c14 = texture(iChannel2, p.xy );
 	vec3 c1 = c14.xyz;
-	p.z += t * 3.; p.x += t * 0.52;
-	vec4 c24 = texture(iChannel2, p.xz / 30.0f);
+	p.y += t * 3.; p.x += t * 0.52;
+	vec4 c24 = texture(iChannel2, p.xy);
 	vec3 c2 = c24.xyz;
 
-	p.z += t * 4.; p.x += t * 0.8;
-	vec4 c34 = texture(iChannel2, p.xz / 30.0f);
+	p.y += t * 4.; p.x += t * 0.8;	
+	vec4 c34 = texture(iChannel2, p.xy );
 	vec3 c3 = c34.xyz;
 
 	c1 += c2 - c3;
 	float z = (c1.x + c1.y + c1.z) / 3.;
-	return p.y + z / 4.;
+	return p.z + z / 4.;
 }
 
 
@@ -63,7 +64,7 @@ void main() {
 	vec2 uv = fragment.position.xy / iResolution.xy - 0.5f;
 	uv.x *= iResolution.x / iResolution.y;
 	vec3 l1 = normalize(vec3(1, 1, 1));
-	vec3 ro = vec3(0.1, 15, 0.1);
+	vec3 ro = vec3(-5, 15, -5);
 	vec3 rc = vec3(0, 0, 0);
 	vec3 ww = normalize(rc - ro);
 	vec3 uu = normalize(cross(vec3(0,1,0), ww));
@@ -75,9 +76,10 @@ void main() {
 		vec3 p = ro + rd * d;
 		vec3 n = norm(p);
 		float spc = pow(max(0.0, dot(reflect(l1, n), rd)), 30.0);
-		vec4 ref = texture(iChannel0, normalize(reflect(rd, n)).xy);
-		vec3 rfa = texture(iChannel1, (p+n).xz / 6.0f).xyz * (8.0f/d);
-		c = rfa.xyz + (ref.xyz * 0.5)+ spc;
+		//vec4 ref = texture(iChannel0, normalize(reflect(rd, n));
+		//vec3 rfa = texture(iChannel1, (p+n).xz / 6.0f).xyz * (8.0f/d);
+		//c = rfa.xyz + (ref.xyz * 0.5)+ spc;
+		c = c + spc;// seulement les reflets calculés à partir de la dernière image 
 	}
 	FragColor = vec4((c - 0.5) * 1.1 + 0.5, 1.0 );
 }

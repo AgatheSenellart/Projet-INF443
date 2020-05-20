@@ -39,7 +39,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     water = create_water(gui_scene);
     water.uniform.color = {0.2f, 0.6, 1.0};
-    water.shader = shaders["river"];
+    
 
     //Create moss
     moss = create_moss();
@@ -82,9 +82,11 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
         tree_structures.push_back(arbre);
     }
     // un arbre plus grand à cote de la maison
-    taille_branche = 0.3f;
+    
     grand_arbre = grammar_tree(5);
     fill_coordinates(grand_arbre, taille_branche);
+
+    timer.t_max = 500;
     
 }
 
@@ -96,9 +98,11 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     
 
     set_gui();
+   
     timer.update();
     // Get local time
     const float t = timer.t;
+    std::cout << t << std::endl;
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
@@ -114,16 +118,16 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // Display water
     //channel0
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, channel0);
+    //glActiveTexture(GL_TEXTURE0);
+    //glEnable(GL_TEXTURE_2D);
+    //glBindTexture(GL_TEXTURE_2D, channel0);
     //channel1
-    glActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, channel1);
+    glActiveTexture(GL_TEXTURE0);
+    //glEnable(GL_TEXTURE_2D);
+    //glBindTexture(GL_TEXTURE_2D, channel1);
     //channel2
-    glActiveTexture(GL_TEXTURE2);
-    glEnable(GL_TEXTURE_2D);
+    //glActiveTexture(GL_TEXTURE1);
+    //glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, channel2);
 
     //Send the time to the shader;
@@ -131,7 +135,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glUniform1f(time_loc, t);
 
     
-    draw(water, scene.camera, shaders["river"]);
+    draw(water, scene.camera,shaders["river"]);
 
     // put neutral texture again
     glActiveTexture(GL_TEXTURE0);
@@ -140,7 +144,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
-
+    glActiveTexture(GL_TEXTURE0);
     // Display cliff
     gui_scene.scaling = 4.f;
     gui_scene.octave = 9;
@@ -247,10 +251,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display tree
-    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
+    //draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
 
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
