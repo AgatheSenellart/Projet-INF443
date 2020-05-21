@@ -130,30 +130,46 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         scene.camera.translation = vec3(coords[0], coords[1], - 1.0f);
     }
 
-/*    // Display water
+    // Display water
     //channel0
-    //glActiveTexture(GL_TEXTURE0);
-    //glEnable(GL_TEXTURE_2D);
-    //glBindTexture(GL_TEXTURE_2D, channel0);
-    //channel1
     glActiveTexture(GL_TEXTURE0);
-    //glEnable(GL_TEXTURE_2D);
-    //glBindTexture(GL_TEXTURE_2D, channel1);
+    glBindTexture(GL_TEXTURE_2D, channel0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    //channel1
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, channel1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     //channel2
-    //glActiveTexture(GL_TEXTURE1);
-    //glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, channel2);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-    //Send the time to the shader;
+    //Activate Shader
     glUseProgram(shaders["river"]);
+
+
+    //Send the time to the shader;
     const GLint time_loc = glGetUniformLocation(shaders["river"], "time");
     glUniform1f(time_loc, t);
 
+    //Send texture units to the shader;
     
-    draw(water, scene.camera,shaders["wireframe"]);
-*/
+    const GLint channel0_loc = glGetUniformLocation(shaders["river"], "iChannel0");
+
+    glUniform1i(channel0_loc, 0);
+    const GLint channel1_loc = glGetUniformLocation(shaders["river"], "iChannel1");
+
+    glUniform1i(channel1_loc, 1);
+    const GLint channel2_loc = glGetUniformLocation(shaders["river"], "iChannel2");
+
+    glUniform1i(channel2_loc, 2);
+
+    
+    draw(water, scene.camera,shaders["river"]);
+
     // put neutral texture again
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
@@ -270,10 +286,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display big tree
-    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
+    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
 
     
 
