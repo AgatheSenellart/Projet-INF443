@@ -83,7 +83,6 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     feuille = vcl::feuille(taille_branche);
     branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
     update_position_forest(100, tree_positions ,2*taille_branche, gui_scene);
-    update_size(500, tree_sizes);
     //Structure des arbres
     for (int i = 0; i < 10; i++)
     {
@@ -91,7 +90,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
         fill_coordinates(arbre, taille_branche);
         tree_structures.push_back(arbre);
     }
-    // un arbre plus grand à cote de la maison
+    // a bigger tree next to the house
     
     grand_arbre = grammar_tree(5);
     fill_coordinates(grand_arbre, taille_branche);
@@ -109,7 +108,6 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     timer.update();
     // Get local time
     float t = timer.t;
-    //std::cout << std::sin(t) << std::endl;
 
     set_gui();
    
@@ -154,8 +152,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glUniform1f(time_loc, t);
 
     
-    draw(water, scene.camera,shaders["mesh"]);
-
+    draw(water, scene.camera,shaders["wireframe"]);
+*/
     // put neutral texture again
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
@@ -164,7 +162,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     glActiveTexture(GL_TEXTURE0);
-  */
+
 
     // Display cliff
     gui_scene.scaling = 4.f;
@@ -245,7 +243,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
 
-    // Diplay reed (LAST DISPLAY)
+    // Diplay reed
 
     glEnable(GL_BLEND); // Enable use of alpha component as color blending for transparent elements
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -272,10 +270,9 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        //(tree_structures[i%10]).uniform.transform.scaling = tree_sizes[i];
         draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
-    // Display tree
+    // Display big tree
     draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
 
     
@@ -299,7 +296,6 @@ void scene_model::keyboard_input(scene_structure& scene, GLFWwindow* window, int
         if (!(pedestrian_view)){
             last_overview_camera = scene.camera;
             scene.camera = last_pedestrian_camera;
-
         }
         pedestrian_view = !(pedestrian_view);
     }

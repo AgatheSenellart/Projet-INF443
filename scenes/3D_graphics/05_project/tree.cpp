@@ -63,7 +63,7 @@ namespace vcl {
 		if (n == 0) return;
 		if (n->length == 0) return;
 		// matrice de dilatation à faire avant la matrice T
-		n->length = n->length * rand_interval(0.8f, 1.3f);
+        n->length = n->length * rand_interval(0.6f, 1.5f);
 		// angle 
 		float alpha = 3.14f / 4.0f;
 		// On définit les matrices de transformations locales
