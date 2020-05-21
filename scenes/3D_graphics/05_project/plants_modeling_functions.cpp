@@ -46,9 +46,9 @@ void update_position_river(int N, std::vector<vcl::vec3>& positions, float min_d
         float detect_river = v - 1.8*u;
         float detect_sea = u - std::cos(4*v);
 
-        bool on_bank = ((-0.95 < detect_river) && (-0.9 > detect_river) ) || ((-0.8 < detect_river) && (-0.75> detect_river) );
+        bool on_bank = ((-0.95 < detect_river) && (-0.9 > detect_river) ) || ((-0.8 < detect_river) && (-0.75> detect_river)) || ((0 < detect_sea) && (0.1f> detect_sea));
 
-        if ( on_bank && (detect_sea > 0)){
+        if ( on_bank && (detect_sea > 0) && ((detect_river < -0.9) || (detect_river > -0.8))){
             vec3 position = evaluate_terrain(u,v, gui_scene);
             float x = position[0];
             float y = position[1];

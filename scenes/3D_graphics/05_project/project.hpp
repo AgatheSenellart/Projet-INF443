@@ -48,6 +48,7 @@ struct scene_model : scene_base
     std::vector<float> moss_sizes;
     std::vector<vcl::vec3> reed_positions;
     std::vector<vcl::vec3> tree_positions;
+    std::vector<float> tree_sizes;
 
     //tree structure
     std::vector<noeud*> tree_structures;
@@ -58,13 +59,19 @@ struct scene_model : scene_base
     GLuint channel1;
     GLuint channel2;
 
-    
 
     // textures' id for the hut
     GLuint wall_texture;
     GLuint wall_window_texture;
     GLuint wall_window_door_texture;
     GLuint roof_texture;
+
+    // Keyboard interaction
+    void keyboard_input(scene_structure& scene, GLFWwindow* window, int key, int scancode, int action, int mods);
+    bool pedestrian_view;
+    bool forward = false;
+    camera_scene last_pedestrian_camera;
+    camera_scene last_overview_camera;
 
     void set_gui();
 

@@ -22,6 +22,15 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     scene.camera.scale = 20.0f;
     scene.camera.apply_rotation(-1.0f,0,0,1.2f);
 
+    //Setup initial views position
+    pedestrian_view = false;
+    last_overview_camera = scene.camera;
+    last_pedestrian_camera = scene.camera;
+    last_pedestrian_camera.translation = vec3(-3.0f,0.0f,-1.5f);
+    last_pedestrian_camera.scale = 0.1f;
+    last_pedestrian_camera.orientation = mat3{{1,0,0},{0,0,1},{0,-1,0}};
+
+
     //Create cliff
     cliff = create_cliff(gui_scene);
     cliff.uniform.color = {1.0f,1.0f,1.0f};
@@ -73,7 +82,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     branche = vcl::branche(taille_branche);
     feuille = vcl::feuille(taille_branche);
     branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
-    update_position_forest(200, tree_positions ,2*taille_branche, gui_scene);
+    update_position_forest(100, tree_positions ,2*taille_branche, gui_scene);
+    update_size(500, tree_sizes);
     //Structure des arbres
     for (int i = 0; i < 10; i++)
     {
@@ -99,7 +109,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     timer.update();
     // Get local time
     float t = timer.t;
-    std::cout << std::sin(t) << std::endl;  
+    //std::cout << std::sin(t) << std::endl;
 
     set_gui();
    
@@ -115,8 +125,14 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     draw(surface, scene.camera, shaders["mesh"]);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
+    //Walking in pedestrian view
+    if (forward){
+        scene.camera.apply_translation_orthogonal_to_screen_plane(0.2);
+        vec3 coords = scene.camera.translation;
+        scene.camera.translation = vec3(coords[0], coords[1], - 1.0f);
+    }
 
-    // Display water
+/*    // Display water
     //channel0
     //glActiveTexture(GL_TEXTURE0);
     //glEnable(GL_TEXTURE_2D);
@@ -138,7 +154,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glUniform1f(time_loc, t);
 
     
-    draw(water, scene.camera,shaders["river"]);
+    draw(water, scene.camera,shaders["mesh"]);
 
     // put neutral texture again
     glActiveTexture(GL_TEXTURE0);
@@ -148,6 +164,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     glActiveTexture(GL_TEXTURE0);
+  */
+
     // Display cliff
     gui_scene.scaling = 4.f;
     gui_scene.octave = 9;
@@ -193,7 +211,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene);
+    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3(0.0f, 0.0f, -0.4f);
     draw(wall, scene.camera, shaders["mesh"]);
 
     glBindTexture(GL_TEXTURE_2D, wall_window_texture);
@@ -201,26 +219,26 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     angle = angle - 3.14/2;
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene);
+    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3(0.0f, 0.0f, -0.4f);
     draw(wall, scene.camera, shaders["mesh"]);
 
     glBindTexture(GL_TEXTURE_2D, wall_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2f, 0.8f, gui_scene) + vec3({std::cos(3.14f/6)*wall_size, std::sin(3.14f/6)*wall_size, 0});
+    wall.uniform.transform.translation = evaluate_terrain(0.2f, 0.8f, gui_scene) + vec3(0.0f, 0.0f, -0.4f) + vec3({std::cos(3.14f/6)*wall_size, std::sin(3.14f/6)*wall_size, 0});
     draw(wall, scene.camera, shaders["mesh"]);
 
     angle = angle + 3.14/2;
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {std::sin(angle), std::cos(angle), 0.0},{0.0, 0.0, 1.0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2f, 0.8f, gui_scene) + vec3({-std::cos(3.14f/3)*wall_size, std::sin(3.14f/3)*wall_size, 0});
+    wall.uniform.transform.translation = evaluate_terrain(0.2f, 0.8f, gui_scene) + vec3(0.0f, 0.0f, -0.4f) + vec3({-std::cos(3.14f/3)*wall_size, std::sin(3.14f/3)*wall_size, 0});
     draw(wall, scene.camera, shaders["mesh"]);
 
     glBindTexture(GL_TEXTURE_2D, roof_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     wall.uniform.transform.rotation = {{std::cos(angle), -std::sin(angle), 0.0}, {0, 0, 1.0},{std::sin(angle),std::cos(angle), 0}};
-    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({0.0, 0.0,wall_size});
+    wall.uniform.transform.translation = evaluate_terrain(0.2, 0.8, gui_scene) + vec3({0.0, 0.0,wall_size}) + vec3(0.0f, 0.0f, -0.4f);
     draw(wall, scene.camera, shaders["mesh"]);
 
 
@@ -254,10 +272,11 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        //(tree_structures[i%10]).uniform.transform.scaling = tree_sizes[i];
+        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display tree
-    //draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
+    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene));
 
     
 
@@ -268,6 +287,32 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     }
 
 }
+
+
+void scene_model::keyboard_input(scene_structure& scene, GLFWwindow* window, int key, int scancode, int action, int mods){
+    if ((key == GLFW_KEY_P) & (action == GLFW_PRESS)){ //Changing overview
+        if (pedestrian_view){
+            last_pedestrian_camera = scene.camera;
+            scene.camera = last_overview_camera;
+            forward = false;
+        }
+        if (!(pedestrian_view)){
+            last_overview_camera = scene.camera;
+            scene.camera = last_pedestrian_camera;
+
+        }
+        pedestrian_view = !(pedestrian_view);
+    }
+
+    if ((key == GLFW_KEY_F) & (action == GLFW_PRESS) & pedestrian_view){ //Moving forward in pedestrian view
+        forward = true;
+    }
+
+    if ((key == GLFW_KEY_F) & (action == GLFW_RELEASE) & pedestrian_view){ //Moving forward in pedestrian view
+        forward = false;
+    }
+}
+
 
 void scene_model::set_gui()
 {
