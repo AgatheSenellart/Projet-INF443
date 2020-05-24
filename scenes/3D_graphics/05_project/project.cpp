@@ -16,6 +16,12 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     surface.uniform.shading.specular = 0.0f; // non-specular terrain material
     surface.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/forest_floor_2.png"));
 
+    //Create border
+    border = create_border();
+    border.uniform.color = {1.0f, 1.0f, 1.0f};
+    border.uniform.shading.diffuse = 1.0;
+    border.uniform.shading.specular = 0.0;
+    border.uniform.shading.ambiant = 1.0f;
 
     // Setup initial camera mode and position
     scene.camera.camera_type = vcl::camera_control_spherical_coordinates;
@@ -72,7 +78,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     //Create reed
     reed = create_reed();
-    reed.uniform.shading = {1,0,0}; // set pure ambiant component (no diffuse, no specular) - allow to only see the color of the texture
+    reed.uniform.shading = {0.8f,0,0}; // set pure ambiant component (no diffuse, no specular) - allow to only see the color of the texture
     reed.uniform.transform.scaling = 0.5;
     reed.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/billboard_reed_2.png"), GL_REPEAT, GL_REPEAT);
     update_position_river(1500, reed_positions, 0, gui_scene);
@@ -129,6 +135,19 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         vec3 coords = scene.camera.translation;
         scene.camera.translation = vec3(coords[0], coords[1], - 1.0f);
     }
+
+    //Display border
+    border.uniform.transform.rotation = {{1.f,0.f,0.f},{0.f,1.f,0.f},{0.f,0.f,1.f}};
+    border.uniform.transform.translation = {0.f,10.f,-1.8f};
+    draw(border, scene.camera, shaders["mesh"]);
+    border.uniform.transform.translation = {0.f,0.f,0.f};
+    border.uniform.transform.rotation = {{1.f,0.f,0.f},{0.f,1.f,0.f},{0.f,0.f,1.f}};
+    border.uniform.transform.translation = {0.f,-10.f,-1.8f};
+    draw(border, scene.camera, shaders["mesh"]);
+    border.uniform.transform.translation = {0.f,0.f,0.f};
+    border.uniform.transform.rotation = {{0.f,1.f,0.f},{-1.f,0.f,0.f},{0.f,0.f,1.f}};
+    border.uniform.transform.translation = {-10.f,0,-1.8f};
+    draw(border, scene.camera, shaders["mesh"]);
 
     // Display water
     //channel0
@@ -286,7 +305,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display big tree
     draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);

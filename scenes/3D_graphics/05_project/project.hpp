@@ -33,6 +33,7 @@ struct scene_model : scene_base
 
     //  List of class attributes to be initialized in setup_data and used in frame_draw
     mesh_drawable surface;
+    mesh_drawable border;
     mesh_drawable water;
     mesh_drawable cliff;
     mesh_drawable moss;

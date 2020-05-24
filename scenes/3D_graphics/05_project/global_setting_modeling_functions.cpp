@@ -244,3 +244,47 @@ mesh create_water(const gui_scene_structure& gui_scene)
 
     return water;
 }
+
+mesh create_border()
+{
+    // Number of samples of the terrain is N x N
+    const size_t N = 100;
+    const size_t H = 20;
+
+    mesh border; // temporary terrain storage (CPU only)
+    border.position.resize(N*H);
+    border.texture_uv.resize(N *H);
+
+    // Fill terrain geometry
+    for(size_t ku=0; ku<N; ++ku)
+    {
+        for(size_t kh=0; kh<H; ++kh)
+        {
+            // Compute local parametric coordinates (u,v) \in [0,1]
+            const float u = ku/(N-1.0f);
+            const float h = kh/(H-1.0f);
+
+            border.position[kh+H*ku] = {20*(u-0.5f), 0.0f, 20*(h-0.5f)*0.2f};
+            border.texture_uv[kh + H * ku] = {5*ku,5*kh};
+        }
+    }
+
+
+    // Generate triangle organization
+    //  Parametric surface with uniform grid sampling: generate 2 triangles for each grid cell
+    for(unsigned int ku=0; ku<N-1; ++ku)
+    {
+        for(unsigned int kh=0; kh<H-1; ++kh)
+        {
+            const unsigned int idx = kh + H*ku; // current vertex offset
+
+            const uint3 triangle_1 = {idx, idx+1+H, idx+1};
+            const uint3 triangle_2 = {idx, idx+H, idx+1+H};
+
+            border.connectivity.push_back(triangle_1);
+            border.connectivity.push_back(triangle_2);
+        }
+    }
+
+    return border;
+}

@@ -16,8 +16,8 @@ mesh create_bridge(float h, float L)
     // Number of samples of the terrain is N x N
     const size_t N = 30;
     const float Nf = 30.0f;
-    const size_t Y = 5;
-    const float Yf = 5.0f;
+    const size_t Y = 3;
+    const float Yf = 3.0f;
 
     mesh bridge; // temporary terrain storage (CPU only)
     bridge.position.resize((N+1)*Y);
