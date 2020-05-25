@@ -7,3 +7,4 @@ vcl::vec3 evaluate_terrain(float u, float v, const gui_scene_structure& gui_scen
 mesh create_water(const gui_scene_structure& gui_scene);
 mesh create_cliff(const gui_scene_structure& gui_scene);
 mesh create_border();
+mesh_drawable skybox();

@@ -42,6 +42,7 @@ struct scene_model : scene_base
     mesh_drawable bridge;
     mesh_drawable branche;
     mesh_drawable feuille;
+    mesh_drawable sky;
     float wall_size;
 
 

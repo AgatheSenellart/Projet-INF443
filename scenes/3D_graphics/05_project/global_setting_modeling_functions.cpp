@@ -51,8 +51,8 @@ mesh create_terrain(const gui_scene_structure& gui_scene)
 // Evaluate 3D position of the terrain for any (u,v) \in [0,1]
 vec3 evaluate_terrain(float u, float v, const gui_scene_structure& gui_scene)
 {
-    const float x = 20*(u-0.5f);
-    const float y = 20*(v-0.5f);
+    const float x = 40*(u-0.5f);
+    const float y = 40*(v-0.5f);
 
     float z = 0;
 
@@ -219,7 +219,7 @@ mesh create_water(const gui_scene_structure& gui_scene)
             const float u = ku/(N-1.0f);
             const float v = kv/(N-1.0f);
 
-            water.position[kv+N*ku] = {20*(u-0.5f), 20*(v-0.5f), 0.0f};
+            water.position[kv+N*ku] = {40*(u-0.5f), 40*(v-0.5f), 0.0f};
             water.texture_uv[kv + N * ku] = { u,v };
         }
     }
@@ -265,7 +265,7 @@ mesh create_border()
             const float h = kh/(H-1.0f);
 
             border.position[kh+H*ku] = {20*(u-0.5f), 0.0f, 20*(h-0.5f)*0.2f};
-            border.texture_uv[kh + H * ku] = {5*ku,5*kh};
+            border.texture_uv[kh + H * ku] = {5.0f*ku,5.0f*kh};
         }
     }
 
@@ -287,4 +287,27 @@ mesh create_border()
     }
 
     return border;
+}
+
+// Create mesh_drawable skybox
+
+mesh_drawable skybox()
+{
+    mesh box_cpu = mesh_primitive_parallelepiped({ -15.0f, -15.0f, -20.0f }, { 30, 0,0 }, { 0,30,0 }, { 0,0,30 });
+    box_cpu.texture_uv = { {1 / 4.0f,1.0f},{1 / 4.0f,2 / 3.0f},{1 / 2.0f,2 / 3.0f},{1 / 2.0f,1.0f},
+        {1 / 4.0f,2 / 3.0f},{1 / 4.0f,1 / 3.0f},{1 / 2.0f,1 / 3.0f},{1 / 2.0f,2 / 3.0f} ,
+        { 2 / 4.0f,2 / 3.0f }, { 2 / 4.0f,1 / 3.0f }, { 3 / 4.0f,1 / 3.0f }, { 3 / 4.0f,2 / 3.0f },
+        { 1.0f,2 / 3.0f }, { 1.0f,1 / 3.0f }, { 3 / 4.0f,1 / 3.0f }, { 3 / 4.0f,2 / 3.0f },
+        {0.0f,2 / 3.0f},{0.0f,1 / 3.0f},{1 / 4.0f,1 / 3.0f},{1 / 4.0f,2 / 3.0f} ,
+        {1 / 4.0f,1 / 3.0f},{1 / 4.0f,0.0f},{1 / 2.0f,0.0f},{1 / 2.0f,1 / 3.0f} };
+
+
+
+
+    mesh_drawable box = mesh_drawable(box_cpu);
+    box.uniform.color = { 1.0f, 1.0f, 1.0f };
+    box.uniform.shading = { 1,0,0 };
+    box.uniform.transform.scaling = 2.0f;
+    box.uniform.transform.translation = { 0,0,10.0f };
+    return box;
 }

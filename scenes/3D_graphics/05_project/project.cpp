@@ -102,6 +102,10 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     fill_coordinates(grand_arbre, taille_branche);
 
     timer.t_max = 50;
+
+    //Create Skybox
+    sky = skybox();
+    sky.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/sky3.png"));
     
 }
 
@@ -139,15 +143,15 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     //Display border
     border.uniform.transform.rotation = {{1.f,0.f,0.f},{0.f,1.f,0.f},{0.f,0.f,1.f}};
     border.uniform.transform.translation = {0.f,10.f,-1.8f};
-    draw(border, scene.camera, shaders["mesh"]);
+    //draw(border, scene.camera, shaders["mesh"]);
     border.uniform.transform.translation = {0.f,0.f,0.f};
     border.uniform.transform.rotation = {{1.f,0.f,0.f},{0.f,1.f,0.f},{0.f,0.f,1.f}};
     border.uniform.transform.translation = {0.f,-10.f,-1.8f};
-    draw(border, scene.camera, shaders["mesh"]);
+    //draw(border, scene.camera, shaders["mesh"]);
     border.uniform.transform.translation = {0.f,0.f,0.f};
     border.uniform.transform.rotation = {{0.f,1.f,0.f},{-1.f,0.f,0.f},{0.f,0.f,1.f}};
     border.uniform.transform.translation = {-10.f,0,-1.8f};
-    draw(border, scene.camera, shaders["mesh"]);
+    //draw(border, scene.camera, shaders["mesh"]);
 
     // Display water
     //channel0
@@ -305,10 +309,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display big tree
-    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
+    //draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
 
     
 
@@ -317,6 +321,13 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         vcl::draw(surface, scene.camera, shaders["wireframe"]);
         vcl::draw(cliff, scene.camera, shaders["wireframe"]);
     }
+
+    //Display skybox
+    glBindTexture(GL_TEXTURE_2D, sky.texture_id);
+    draw(sky, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
+
 
 }
 
