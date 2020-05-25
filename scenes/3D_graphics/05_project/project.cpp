@@ -13,6 +13,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     // Create visual terrain surface
     surface = create_terrain(gui_scene);
+    surface.uniform.color = {0.7f,0.9f,0.7f};
     surface.uniform.shading.specular = 0.0f; // non-specular terrain material
     surface.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/forest_floor_2.png"));
 
@@ -43,6 +44,10 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     cliff.uniform.shading.ambiant = 0.8f;
     cliff.uniform.shading.specular = 0.0f;
     cliff.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/cliff_4.png"));
+    waterfall_support = create_waterfall_support(gui_scene);
+    waterfall_support.uniform.color = {1.0f,1.0f,1.0f};
+    waterfall_support.uniform.shading.ambiant = 0.8f;
+    waterfall_support.uniform.shading.specular = 0.0f;
 
     //Create water
 
@@ -58,6 +63,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
 
     //Create moss
     moss = create_moss();
+    surface.uniform.color = {0.7f,0.9f,0.7f};
     moss.uniform.shading.specular = 0.0f; // non-specular terrain material
     moss.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/moss.png"));
     update_position_forest(500,moss_positions,0, gui_scene);
@@ -88,7 +94,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     branche = vcl::branche(taille_branche);
     feuille = vcl::feuille(taille_branche);
     branche.shader = shaders["mesh"]; feuille.shader = shaders["mesh"];
-    update_position_forest(100, tree_positions ,2*taille_branche, gui_scene);
+    update_position_forest(200, tree_positions ,2*taille_branche, gui_scene);
     //Structure des arbres
     for (int i = 0; i < 10; i++)
     {
@@ -211,16 +217,20 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glBindTexture(GL_TEXTURE_2D, cliff.texture_id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    cliff.uniform.transform.scaling = 30;
-    cliff.uniform.transform.translation = vec3(10, 10, -1);
+    cliff.uniform.transform.scaling = 50;
+    cliff.uniform.transform.translation = vec3(20, 20, -1);
     draw(cliff, scene.camera, shaders["mesh"]);
+    waterfall_support.uniform.transform.scaling = 50;
+    waterfall_support.uniform.transform.translation = vec3(20, 20, -1);
+    draw(waterfall_support, scene.camera, shaders["mesh"]);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Display bridge
     glBindTexture(GL_TEXTURE_2D, roof_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    bridge.uniform.transform.translation = {1.7f, -3.0f, -0.1f};
+    bridge.uniform.transform.scaling = 1.3;
+    bridge.uniform.transform.translation = {7.2f, -2.0f, -0.1f};
     float bridge_angle = 3.14/6;
     bridge.uniform.transform.rotation = {{cos(bridge_angle), -sin(bridge_angle), 0}, {sin(bridge_angle), cos(bridge_angle), 0}, {0.0f, 0.0f, 1.0f}};
     draw(bridge, scene.camera, shaders["mesh"]);
@@ -309,10 +319,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display big tree
-    //draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
+    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
 
     
 

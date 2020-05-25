@@ -65,10 +65,10 @@ vec3 evaluate_terrain(float u, float v, const gui_scene_structure& gui_scene)
         }
     }
 
-    float detect_sea = u - std::cos(4*v);
+    float detect_sea = u - 0.5f*std::cos(4*v);
     float sea_depth = 4.0;
-    if (detect_sea < 0){
-        z -= sea_depth * std::sqrt(- detect_sea);
+    if (detect_sea < 0.5){
+        z -= sea_depth * std::sqrt(- detect_sea + 0.5f);
     }
 
     if (-0.9 < detect_river){
@@ -199,6 +199,67 @@ mesh create_cliff(const gui_scene_structure& gui_scene){
     return cliff;
 }
 
+mesh create_waterfall_support(const gui_scene_structure& gui_scene){
+
+    const size_t size_C = 50;
+    const float size_Cf = 50.0;
+    const size_t H = 60;
+    const float Hf = 60.0;
+    const float totalf = 140.f;
+
+    mesh waterfall_support;
+    waterfall_support.position.resize(size_C*(H+1));
+    waterfall_support.texture_uv.resize(size_C*(H+1));
+
+    // Fill sides geometry
+    for(size_t kz = 0; kz < H+1; ++kz){
+        for (unsigned int i = 0; i < size_C; i++){
+            float kz_texture = 0.03*kz;
+            float i_texture = 0.03*i;
+            float x = - 0.3 + 0.3*i / size_Cf;
+            float y = -4./3.*x - 0.5;
+            waterfall_support.position[kz*size_C + i] = {x, y, 0.6f*kz/Hf};
+            waterfall_support.texture_uv[kz*size_C + i] = {kz_texture,i_texture};
+        }
+    }
+
+    // get gui parameters
+    const float scaling = gui_scene.scaling;
+    const int octave = gui_scene.octave;
+    const float persistency = gui_scene.persistency;
+    const float height = gui_scene.height;
+
+
+    for(size_t kz = 0; kz < H+1; ++kz){
+        for (unsigned int i = 0; i < size_C; i++){
+
+            // Evaluate Perlin noise
+            const float noise = perlin(scaling*(kz/Hf + std::cos(i)), scaling*(i/totalf), octave, persistency);
+
+            float x = (waterfall_support.position[kz*size_C + i])[0];
+            float y = (waterfall_support.position[kz*size_C + i])[1];
+            float z = (waterfall_support.position[kz*size_C + i])[2];
+            waterfall_support.position[kz*size_C + i] = {x + 0.01f*noise, y + 0.006f*noise, z - 0.01f*noise};
+        }
+    }
+
+    // Generate triangle organization
+    //  Fill sides connectivity
+    for(unsigned int kz = 0 ; kz < H ; kz++){
+        for(unsigned int i=0; i<size_C-1; i++){
+            const unsigned int idx = size_C*kz + i; // current vertex offset
+
+            const uint3 triangle_1 = {idx, idx+1+size_C, idx+1};
+            const uint3 triangle_2 = {idx, idx+size_C, idx+1+size_C};
+
+           waterfall_support.connectivity.push_back(triangle_1);
+           waterfall_support.connectivity.push_back(triangle_2);
+        }
+    }
+
+    return waterfall_support;
+}
+
 
 // Generate terrain mesh
 mesh create_water(const gui_scene_structure& gui_scene)
@@ -308,6 +369,6 @@ mesh_drawable skybox()
     box.uniform.color = { 1.0f, 1.0f, 1.0f };
     box.uniform.shading = { 1,0,0 };
     box.uniform.transform.scaling = 2.0f;
-    box.uniform.transform.translation = { 0,0,10.0f };
+    box.uniform.transform.translation = { 0,0,6.0f };
     return box;
 }

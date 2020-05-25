@@ -36,6 +36,7 @@ struct scene_model : scene_base
     mesh_drawable border;
     mesh_drawable water;
     mesh_drawable cliff;
+    mesh_drawable waterfall_support;
     mesh_drawable moss;
     mesh_drawable reed;
     mesh_drawable wall;
