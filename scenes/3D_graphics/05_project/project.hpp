@@ -61,6 +61,10 @@ struct scene_model : scene_base
     GLuint channel1;
     GLuint channel2;
 
+    //Id for the waterfall textures
+    GLuint noise;
+    GLuint facade;
+
     // textures' id for the hut
     GLuint wall_texture;
     GLuint wall_window_texture;

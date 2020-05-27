@@ -14,5 +14,12 @@
 #include "scenes/3D_graphics/03_animation/interpolation_position.hpp"
 #include "scenes/3D_graphics/04_simulation/example_mass_spring.hpp"
 #include "scenes/3D_graphics/04_simulation/example_sphere_gravity.hpp"
+#include "scenes/3D_graphics/05_project/global_setting_modeling_functions.hpp"
+#include "scenes/3D_graphics/05_project/human_activity_modeling_functions.hpp"
+#include "scenes/3D_graphics/05_project/plants_modeling_functions.hpp"
 #include "scenes/3D_graphics/05_project/project.hpp"
-#include "scenes/3D_graphics/05_project/modeling_functions.hpp"
+#include "scenes/3D_graphics/05_project/tree.hpp"
+
+
+
+

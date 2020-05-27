@@ -113,8 +113,12 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     sky = skybox();
     sky.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/sky3.png"));
     
-}
+    //Create texture_id for the waterfall
+    noise = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/noise.png"));
+    facade = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/waterfall_support.png"));
 
+
+}   
 
 
 /** This function is called at each frame of the animation loop.
@@ -181,8 +185,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
 
     //Send the time to the shader;
-    const GLint time_loc = glGetUniformLocation(shaders["river"], "time");
-    glUniform1f(time_loc, t);
+    const GLint time_river = glGetUniformLocation(shaders["river"], "time");
+    glUniform1f(time_river, t);
 
     //Send texture units to the shader;
     
@@ -220,10 +224,45 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     cliff.uniform.transform.scaling = 50;
     cliff.uniform.transform.translation = vec3(20, 20, -1);
     draw(cliff, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
+    // Display waterfall
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(false);
+        // Adjust some uniform parameters
     waterfall_support.uniform.transform.scaling = 50;
     waterfall_support.uniform.transform.translation = vec3(20, 20, -1);
-    draw(waterfall_support, scene.camera, shaders["mesh"]);
+        // Bind the textures necessary
+    //noise
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, noise);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    //facade
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, facade);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    //Activate Shader
+    glUseProgram(shaders["waterfall"]);
+
+    //Send the time to the shader;
+    const GLint time_waterfall = glGetUniformLocation(shaders["waterfall"], "time");
+    glUniform1f(time_waterfall, t);
+
+    //Send texture units to the shader;
+
+    const GLint noise_loc = glGetUniformLocation(shaders["waterfall"], "noise");
+    glUniform1i(noise_loc, 0);
+    const GLint facade_loc = glGetUniformLocation(shaders["waterfall"], "falaise");
+    glUniform1i(facade_loc, 1);
+
+    draw(waterfall_support, scene.camera, shaders["waterfall"]);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glDepthMask(true);
 
     // Display bridge
     glBindTexture(GL_TEXTURE_2D, roof_texture);
@@ -319,10 +358,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     // Display forest
     for (size_t i = 0; i < tree_positions.size(); i++)
     {
-        draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
+        //draw(tree_structures[i%10], scene.camera, branche, feuille,tree_positions[i]);
     }
     // Display big tree
-    draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
+    //draw(grand_arbre, scene.camera, branche, feuille, evaluate_terrain(0.18f, 0.8f,gui_scene)-0.2f);
 
     
 
