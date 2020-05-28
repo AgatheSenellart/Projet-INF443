@@ -2,10 +2,15 @@
 #include "global_setting_modeling_functions.hpp"
 #include "plants_modeling_functions.hpp"
 #include "human_activity_modeling_functions.hpp"
-
-using namespace vcl;
+#include "tree.hpp"
 
 #ifdef PROJECT
+#include <random>
+// Generator for uniform random number
+std::default_random_engine generator;
+std::uniform_real_distribution<float> distrib(0.0,1.0);
+
+using namespace vcl;
 
 /** This function is called before the beginning of the animation loop
     It is used to initialize all part-specific data */
@@ -60,6 +65,11 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     water = create_water(gui_scene);
     water.uniform.color = {0.2f, 0.6, 1.0};
     
+    // Create drop
+    drop = create_drop();
+    drop.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/droplet_4.png"), GL_REPEAT, GL_REPEAT);
+    droplet_timer.periodic_event_time_step = 0.0001f;
+
 
     //Create moss
     moss = create_moss();
@@ -107,7 +117,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     grand_arbre = grammar_tree(5);
     fill_coordinates(grand_arbre, taille_branche);
 
-    timer.t_max = 50;
+    water_timer.t_max = 50;
 
     //Create Skybox
     sky = skybox();
@@ -125,9 +135,10 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     It is used to compute time-varying argument and perform data data drawing */
 void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& ){
 
-    timer.update();
+    const float dt = droplet_timer.update();
+    water_timer.update();
     // Get local time
-    float t = timer.t;
+    float t = water_timer.t;
 
     set_gui();
    
@@ -163,6 +174,20 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     border.uniform.transform.translation = {-10.f,0,-1.8f};
     //draw(border, scene.camera, shaders["mesh"]);
 
+
+    // Display cliff
+    gui_scene.scaling = 4.f;
+    gui_scene.octave = 9;
+    gui_scene.persistency = 0.7f;
+
+    glBindTexture(GL_TEXTURE_2D, cliff.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    cliff.uniform.transform.scaling = 50;
+    cliff.uniform.transform.translation = vec3(20, 20, -1);
+    draw(cliff, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
     // Display water
     //channel0
     glActiveTexture(GL_TEXTURE0);
@@ -189,7 +214,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glUniform1f(time_river, t);
 
     //Send texture units to the shader;
-    
+
     const GLint channel0_loc = glGetUniformLocation(shaders["river"], "iChannel0");
 
     glUniform1i(channel0_loc, 0);
@@ -200,7 +225,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     glUniform1i(channel2_loc, 2);
 
-    
+
     draw(water, scene.camera,shaders["river"]);
 
     // put neutral texture again
@@ -213,18 +238,6 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glActiveTexture(GL_TEXTURE0);
 
 
-    // Display cliff
-    gui_scene.scaling = 4.f;
-    gui_scene.octave = 9;
-    gui_scene.persistency = 0.7f;
-
-    glBindTexture(GL_TEXTURE_2D, cliff.texture_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    cliff.uniform.transform.scaling = 50;
-    cliff.uniform.transform.translation = vec3(20, 20, -1);
-    draw(cliff, scene.camera, shaders["mesh"]);
-    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Display waterfall
     glEnable(GL_BLEND);
@@ -232,7 +245,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glDepthMask(false);
         // Adjust some uniform parameters
     waterfall_support.uniform.transform.scaling = 50;
-    waterfall_support.uniform.transform.translation = vec3(20, 20, -1);
+    waterfall_support.uniform.transform.translation = vec3(19.5, 19.5, -1);
         // Bind the textures necessary
     //noise
     glActiveTexture(GL_TEXTURE0);
@@ -261,6 +274,72 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     draw(waterfall_support, scene.camera, shaders["waterfall"]);
     glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glDepthMask(true);
+
+
+
+    // Emission of new particle if needed
+    const bool is_new_particle = droplet_timer.event;
+    if( is_new_particle )
+    {
+        const vec3 p0 = {12.f,4.f,-1.0f};
+
+        for (int i=0; i<5; i++){
+            // Initial speed is random. (x,z) components are uniformly distributed along a circle.
+            const float theta     = 2*3.14f*distrib(generator);
+            const vec3 v0 = vec3( std::cos(theta), std::sin(theta), 5.0f);
+
+            particles.push_back({p0,v0});
+
+        }
+    }
+
+
+    // Evolve position of particles
+    const vec3 g = {0.0f,0.0f,-9.81f};
+    for(particle_structure& particle : particles)
+    {
+        const float m = 0.01f; // particle mass
+
+        vec3& p = particle.p;
+        vec3& v = particle.v;
+
+        const vec3 F = m*g;
+
+        // Numerical integration
+        v = v + dt*F/m;
+        p = p + dt*v;
+    }
+
+
+    // Remove particles that are too low
+    for(auto it = particles.begin(); it!=particles.end(); ++it)
+        if( it->p.z < -5)
+            it = particles.erase(it);
+
+
+    // Display particles
+
+    glEnable(GL_BLEND); // Enable use of alpha component as color blending for transparent elements
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Disable depth buffer writing
+    //  - Transparent elements cannot use depth buffer
+    //  - They are supposed to be display from furest to nearest elements
+    glDepthMask(false);
+
+    glBindTexture(GL_TEXTURE_2D, drop.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+
+    for(particle_structure& particle : particles){
+        drop.uniform.transform.rotation = scene.camera.orientation;
+        drop.uniform.transform.scaling = 0.8f;
+        drop.uniform.transform.translation = particle.p;
+        draw(drop, scene.camera, shaders["mesh"]);
+        }
+
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     glDepthMask(true);
 

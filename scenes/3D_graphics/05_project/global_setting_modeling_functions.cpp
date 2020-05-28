@@ -1,6 +1,6 @@
 #include "global_setting_modeling_functions.hpp"
 using namespace vcl;
-
+#ifdef PROJECT
 
 // Generate terrain mesh
 mesh create_terrain(const gui_scene_structure& gui_scene)
@@ -239,7 +239,8 @@ mesh create_waterfall_support(const gui_scene_structure& gui_scene){
             float x = (waterfall_support.position[kz*size_C + i])[0];
             float y = (waterfall_support.position[kz*size_C + i])[1];
             float z = (waterfall_support.position[kz*size_C + i])[2];
-            waterfall_support.position[kz*size_C + i] = {x + 0.01f*noise, y + 0.006f*noise, z - 0.01f*noise};
+            //waterfall_support.position[kz*size_C + i] = {x + 0.01f*noise, y + 0.006f*noise, z - 0.01f*noise};
+            waterfall_support.position[kz*size_C + i] = {x, y, z};
         }
     }
 
@@ -350,6 +351,16 @@ mesh create_border()
     return border;
 }
 
+
+mesh create_drop(){
+    mesh drop;
+    drop.position     = {{-0.2f,0,0}, { 0.2f,0,0}, { 0.2f, 0.4f,0}, {-0.2f, 0.4f,0}};
+    drop.texture_uv   = {{0,1}, {1,1}, {1,0}, {0,0}};
+    drop.connectivity = {{0,1,2}, {0,2,3}};
+
+    return drop;
+}
+
 // Create mesh_drawable skybox
 
 mesh_drawable skybox()
@@ -372,3 +383,4 @@ mesh_drawable skybox()
     box.uniform.transform.translation = { 0,0,6.0f };
     return box;
 }
+#endif

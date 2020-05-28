@@ -1,7 +1,7 @@
 #include "plants_modeling_functions.hpp"
 #include "global_setting_modeling_functions.hpp"
 using namespace vcl;
-
+#ifdef PROJECT
 
 void update_position_forest(int N, std::vector<vcl::vec3>& positions, float min_distance, const gui_scene_structure& gui_scene){
     for (int i = 0; i < N ; i ++){
@@ -87,3 +87,4 @@ mesh create_reed(){
 
     return reed;
 }
+#endif

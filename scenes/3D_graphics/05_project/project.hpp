@@ -14,6 +14,13 @@ struct gui_scene_structure
     float persistency = 0.5f;
 };
 
+// Structure of a particle
+struct particle_structure
+{
+    vcl::vec3 p; // Position
+    vcl::vec3 v; // Speed
+};
+
 struct scene_model : scene_base
 {
 
@@ -79,11 +86,17 @@ struct scene_model : scene_base
     camera_scene last_overview_camera;
 
 
+    // Particles management
+    std::list<particle_structure> particles; // Storage of all currently active particles
+    vcl::mesh_drawable drop; // Visual representation of a particle - a sphere
+    vcl::timer_event droplet_timer;    // Timer allowing to indicate periodic events
+
+
 
     void set_gui();
 
     // timer setup
-    vcl::timer_interval timer;
+    vcl::timer_interval water_timer;
 
     gui_scene_structure gui_scene;
 

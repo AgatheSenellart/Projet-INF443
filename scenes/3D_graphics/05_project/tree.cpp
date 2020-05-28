@@ -4,7 +4,6 @@
 #include "vcl/shape/mesh/mesh_primitive/mesh_primitive.hpp"
 #include "tree.hpp"
 
-
 namespace vcl {
 
 	

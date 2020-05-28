@@ -3,14 +3,13 @@
 #include "vcl/math/transformation/special_transform/special_transform.hpp"
 #include "vcl/shape/mesh/mesh_drawable/mesh_drawable.hpp"
 
-
 namespace vcl {
 	struct noeud
 	{
 		// longueur de la branche. Elle vaut 0 si c'est un bourgeon
 		float length;
 		noeud* fils1 = 0;
-		noeud* fils2 = 0;
+        noeud* fils2 = 0;
 		noeud* fils3 = 0;
 		noeud* fils4 = 0;
 		// qui représente la transformation globale de l'élément
@@ -40,6 +39,5 @@ namespace vcl {
 
 
 }
-
 
 

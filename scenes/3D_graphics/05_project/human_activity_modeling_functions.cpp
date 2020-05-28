@@ -1,6 +1,8 @@
 #include "human_activity_modeling_functions.hpp"
 #include "global_setting_modeling_functions.hpp"
+
 using namespace vcl;
+#ifdef PROJECT
 
 mesh create_wall(float taille){
     mesh wall;
@@ -53,3 +55,4 @@ mesh create_bridge(float h, float L)
 
     return bridge;
 }
+#endif
