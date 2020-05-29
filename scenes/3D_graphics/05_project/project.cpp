@@ -68,7 +68,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& shaders, scene_struct
     // Create drop
     drop = create_drop();
     drop.texture_id = create_texture_gpu(image_load_png("scenes/3D_graphics/05_project/assets/droplet_4.png"), GL_REPEAT, GL_REPEAT);
-    droplet_timer.periodic_event_time_step = 0.0001f;
+    droplet_timer.periodic_event_time_step = 0.001f;
 
 
     //Create moss
@@ -226,7 +226,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glUniform1i(channel2_loc, 2);
 
 
-    draw(water, scene.camera,shaders["river"]);
+    //draw(water, scene.camera,shaders["river"]);
 
     // put neutral texture again
     glActiveTexture(GL_TEXTURE0);
@@ -285,12 +285,12 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     {
         const vec3 p0 = {12.f,4.f,-1.0f};
 
-        for (int i=0; i<5; i++){
+        for (int i=0; i<1; i++){
             // Initial speed is random. (x,z) components are uniformly distributed along a circle.
             const float theta     = 2*3.14f*distrib(generator);
-            const vec3 v0 = vec3( std::cos(theta), std::sin(theta), 5.0f);
+            const vec3 v0 = vec3( 1.2*std::cos(theta), 1.2*std::sin(theta), 5.0f);
 
-            particles.push_back({p0,v0});
+            particles.push_back({p0,v0,3.0f,1.0f});
 
         }
     }
@@ -310,14 +310,20 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         // Numerical integration
         v = v + dt*F/m;
         p = p + dt*v;
+
+        // Evolve size and transparency of the smoke
+        particle.scale *= 1.15;
+        particle.alpha /= 1.1;
     }
 
-
-    // Remove particles that are too low
-    for(auto it = particles.begin(); it!=particles.end(); ++it)
-        if( it->p.z < -5)
-            it = particles.erase(it);
-
+    if (particles.size() > 1) {
+        // Remove particles that are too low
+        for (auto it = particles.begin(); it != particles.end(); ++it) {
+            if (it->p.z < -5)
+                it = particles.erase(it);
+        }
+        
+    }
 
     // Display particles
 
@@ -335,8 +341,10 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     for(particle_structure& particle : particles){
         drop.uniform.transform.rotation = scene.camera.orientation;
-        drop.uniform.transform.scaling = 0.8f;
         drop.uniform.transform.translation = particle.p;
+        drop.uniform.transform.scaling = particle.scale;
+        drop.uniform.color_alpha = particle.alpha;
+        drop.uniform.color = {1, 1, 1 };
         draw(drop, scene.camera, shaders["mesh"]);
         }
 

@@ -19,6 +19,8 @@ struct particle_structure
 {
     vcl::vec3 p; // Position
     vcl::vec3 v; // Speed
+    float scale;
+    float alpha;
 };
 
 struct scene_model : scene_base
@@ -102,4 +104,4 @@ struct scene_model : scene_base
 
 };
 
-#endif
+#endif PROJECT
